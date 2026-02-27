@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://wfcw5ylmiwfg"]
+
+[ext_resource type="Texture2D" uid="uid://b4w5ejbddfjnv" path="res://Assets/sprites/025.00.00.png" id="1_m1htj"]
+[ext_resource type="Script" uid="uid://8756s12umuqx" path="res://Scripts/enemy/Enemy.cs" id="1_wovta"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_wovta"]
+radius = 13.038404
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xeo28"]
+radius = 20.0
+
+[node name="Enemy" type="CharacterBody2D" unique_id=1986832523]
+script = ExtResource("1_wovta")
+
+[node name="Health" type="Node" parent="." unique_id=953692613]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1815589621]
+texture_filter = 1
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_m1htj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=965960027]
+position = Vector2(0, 3)
+shape = SubResource("CircleShape2D_wovta")
+
+[node name="AttackArea" type="Area2D" parent="." unique_id=1508026773]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea" unique_id=875065580]
+position = Vector2(0, 3)
+shape = SubResource("CircleShape2D_xeo28")
+debug_color = Color(0.8177589, 0.03928564, 0.18393132, 0.41960785)

@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://de6wfd6p7q60c"]
+
+[ext_resource type="Texture2D" uid="uid://cg74kcxobu3yq" path="res://Assets/ui/rock.png" id="1_uh273"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2sxyv"]
+size = Vector2(28, 28)
+
+[sub_resource type="TileSet" id="TileSet_uh273"]
+tile_size = Vector2i(32, 32)
+
+[node name="Obstacle" type="StaticBody2D" unique_id=471594127]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1884961856]
+z_index = -1
+scale = Vector2(0.485, 0.485)
+texture = ExtResource("1_uh273")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1820219477]
+position = Vector2(-1, 0)
+shape = SubResource("RectangleShape2D_2sxyv")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1844568771]
+tile_set = SubResource("TileSet_uh273")
+collision_enabled = false

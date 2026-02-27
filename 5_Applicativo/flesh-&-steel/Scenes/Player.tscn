@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://cfpftj1h61kgn"]
+
+[ext_resource type="Script" uid="uid://cal73drss36sm" path="res://Scripts/player/Player.cs" id="1_kyqiw"]
+[ext_resource type="Texture2D" uid="uid://gou6yfvwlb7q" path="res://Assets/sprites/Fs_Fr_Idle.png" id="1_rpqav"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kyqiw"]
+radius = 16.0
+
+[node name="Player" type="CharacterBody2D" unique_id=557256397]
+script = ExtResource("1_kyqiw")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1733472007]
+z_index = 4
+shape = SubResource("CircleShape2D_kyqiw")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2053957930]
+texture_filter = 1
+texture = ExtResource("1_rpqav")
+
+[node name="Health" type="Node" parent="." unique_id=269088708]
