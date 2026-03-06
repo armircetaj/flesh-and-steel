@@ -1,0 +1,86 @@
+[gd_scene format=3 uid="uid://557ql071dht8"]
+
+[ext_resource type="Texture2D" uid="uid://cx5v7d7nt34ly" path="res://Assets/ui/Mappa.png" id="1_3dok0"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o2v85"]
+size = Vector2(62, 360)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5oxym"]
+size = Vector2(61, 359.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ghifo"]
+size = Vector2(517, 43.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_md2jo"]
+size = Vector2(517, 69)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cvs70"]
+size = Vector2(41, 38)
+
+[node name="Room" type="Node2D" unique_id=1886154369]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=994218309]
+texture = ExtResource("1_3dok0")
+
+[node name="Walls" type="Node2D" parent="." unique_id=1070653408]
+
+[node name="RightWall" type="StaticBody2D" parent="Walls" unique_id=841431999]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/RightWall" unique_id=96707663]
+position = Vector2(289, 0)
+shape = SubResource("RectangleShape2D_o2v85")
+
+[node name="LeftWall" type="StaticBody2D" parent="Walls" unique_id=1495986971]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LeftWall" unique_id=56867611]
+position = Vector2(-289.5, 0.25)
+shape = SubResource("RectangleShape2D_5oxym")
+
+[node name="TopWall" type="StaticBody2D" parent="Walls" unique_id=1156808736]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/TopWall" unique_id=922942237]
+position = Vector2(-0.5, -157.75)
+shape = SubResource("RectangleShape2D_ghifo")
+
+[node name="BottomWall" type="StaticBody2D" parent="Walls" unique_id=210703706]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/BottomWall" unique_id=741932193]
+position = Vector2(-0.5, 145.5)
+shape = SubResource("RectangleShape2D_md2jo")
+
+[node name="Doors" type="Node2D" parent="." unique_id=1315861917]
+
+[node name="DoorTop" type="Area2D" parent="Doors" unique_id=356508921]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/DoorTop" unique_id=1197896963]
+position = Vector2(0, -145)
+shape = SubResource("RectangleShape2D_cvs70")
+disabled = true
+debug_color = Color(1, 0, 0.10686197, 0.41960785)
+
+[node name="DoorBottom" type="Area2D" parent="Doors" unique_id=653966013]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/DoorBottom" unique_id=401605384]
+position = Vector2(0, 128)
+shape = SubResource("RectangleShape2D_cvs70")
+disabled = true
+debug_color = Color(1, 0, 0.10686197, 0.41960785)
+
+[node name="DoorLeft" type="Area2D" parent="Doors" unique_id=145170413]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/DoorLeft" unique_id=286803796]
+position = Vector2(-273, -4)
+shape = SubResource("RectangleShape2D_cvs70")
+disabled = true
+debug_color = Color(1, 0, 0.10686197, 0.41960785)
+
+[node name="DoorRigth" type="Area2D" parent="Doors" unique_id=116708014]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/DoorRigth" unique_id=362252331]
+position = Vector2(271, -4)
+shape = SubResource("RectangleShape2D_cvs70")
+disabled = true
+debug_color = Color(1, 0, 0.10686197, 0.41960785)
+
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1051029102]
+z_index = -2

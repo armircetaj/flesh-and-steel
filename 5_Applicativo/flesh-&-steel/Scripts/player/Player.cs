@@ -4,8 +4,8 @@ using System;
 public partial class Player : CharacterBody2D
 {
 	[Export] public float MaxSpeed = 180f;
-	[Export] public float Acceleration = 900f;
-	[Export] public float Friction = 1100f;
+	[Export] public float Acceleration = 800f;
+	[Export] public float Friction = 475f;
 	public override void _PhysicsProcess(double delta)
 	{
 		float d = (float)delta;
