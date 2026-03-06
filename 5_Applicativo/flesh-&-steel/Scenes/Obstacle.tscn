@@ -11,7 +11,7 @@ tile_size = Vector2i(32, 32)
 [node name="Obstacle" type="StaticBody2D" unique_id=471594127]
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1884961856]
-z_index = -1
+z_index = 6
 scale = Vector2(0.485, 0.485)
 texture = ExtResource("1_uh273")
 
