@@ -5,11 +5,24 @@
 [ext_resource type="PackedScene" uid="uid://wfcw5ylmiwfg" path="res://Scenes/Enemy.tscn" id="3_kln2b"]
 [ext_resource type="Texture2D" uid="uid://cx5v7d7nt34ly" path="res://Assets/ui/Mappa.png" id="3_rgh2o"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rgh2o"]
+size = Vector2(62, 360)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pbw6q"]
+size = Vector2(61, 359.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v1gob"]
+size = Vector2(517, 43.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jw32o"]
+size = Vector2(517, 69)
+
 [node name="Main" type="Node2D" unique_id=1967902986]
 
 [node name="Player" parent="." unique_id=1946259075 instance=ExtResource("1_r150o")]
 
 [node name="Obstacle" parent="." unique_id=471594127 instance=ExtResource("2_idj7w")]
+z_index = 1
 position = Vector2(218, 26)
 
 [node name="RoomContainer" type="Node2D" parent="." unique_id=82382883]
@@ -18,9 +31,29 @@ position = Vector2(218, 26)
 z_index = -1
 texture = ExtResource("3_rgh2o")
 
-[node name="Walls" type="StaticBody2D" parent="RoomContainer" unique_id=277680485]
+[node name="RightWall" type="StaticBody2D" parent="RoomContainer" unique_id=277680485]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomContainer/Walls" unique_id=1245204254]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomContainer/RightWall" unique_id=1245204254]
+position = Vector2(289, 0)
+shape = SubResource("RectangleShape2D_rgh2o")
+
+[node name="LeftWall" type="StaticBody2D" parent="RoomContainer" unique_id=1358580885]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomContainer/LeftWall" unique_id=1900081698]
+position = Vector2(-289.5, 0.25)
+shape = SubResource("RectangleShape2D_pbw6q")
+
+[node name="TopWall" type="StaticBody2D" parent="RoomContainer" unique_id=543618011]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomContainer/TopWall" unique_id=339142261]
+position = Vector2(-0.5, -157.75)
+shape = SubResource("RectangleShape2D_v1gob")
+
+[node name="BottomWall" type="StaticBody2D" parent="RoomContainer" unique_id=63739788]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomContainer/BottomWall" unique_id=1302484156]
+position = Vector2(-0.5, 145.5)
+shape = SubResource("RectangleShape2D_jw32o")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1271861978]
 zoom = Vector2(0.5, 0.5)
