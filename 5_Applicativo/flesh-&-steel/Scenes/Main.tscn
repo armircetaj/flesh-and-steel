@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bmsrh0x8eo2sq"]
 
 [ext_resource type="PackedScene" uid="uid://cfpftj1h61kgn" path="res://Scenes/Player/Player.tscn" id="1_r150o"]
+[ext_resource type="PackedScene" uid="uid://wfcw5ylmiwfg" path="res://Scenes/Enemy/Enemy.tscn" id="4_pbw6q"]
 [ext_resource type="Script" uid="uid://cerjoj4cxpb3u" path="res://Scripts/RoomManager.cs" id="4_rgh2o"]
 [ext_resource type="Script" uid="uid://by6me4xy4bbe0" path="res://Scripts/MiniMap.cs" id="5_minimap"]
 
@@ -28,3 +29,6 @@ offset_right = 27.0
 offset_bottom = 64.0
 grow_horizontal = 0
 script = ExtResource("5_minimap")
+
+[node name="Enemy" parent="." unique_id=1986832523 instance=ExtResource("4_pbw6q")]
+position = Vector2(-249, -117)

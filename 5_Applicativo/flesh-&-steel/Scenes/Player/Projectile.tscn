@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://4qaoob71t87j"]
+
+[ext_resource type="Script" uid="uid://cgejlo8wnqnix" path="res://Scripts/player/Projectile.cs" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://ixuk1kt00qj1" path="res://Assets/sprites/Projectile.png" id="1_texture"]
+[ext_resource type="PackedScene" uid="uid://bhc1qviniflrb" path="res://Scenes/Player/Explosion.tscn" id="2_kye6i"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_projectile"]
+radius = 6.0
+
+[node name="Projectile" type="Area2D" unique_id=14654942]
+script = ExtResource("1_script")
+ExplosionScene = ExtResource("2_kye6i")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=980359882]
+texture = ExtResource("1_texture")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2137520920]
+shape = SubResource("CircleShape2D_projectile")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1955208186]
