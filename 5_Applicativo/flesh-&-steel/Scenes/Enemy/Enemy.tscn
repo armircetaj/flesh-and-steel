@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://wfcw5ylmiwfg"]
 
-[ext_resource type="Texture2D" uid="uid://b4w5ejbddfjnv" path="res://Assets/sprites/025.00.00.png" id="1_m1htj"]
 [ext_resource type="Script" uid="uid://8756s12umuqx" path="res://Scripts/enemy/Enemy.cs" id="1_wovta"]
+[ext_resource type="Texture2D" uid="uid://bhu1kb6uwpbhx" path="res://Assets/sprites/Fr_Co_Idle.png" id="2_3l8kd"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xeo28"]
 radius = 20.0
@@ -16,8 +16,8 @@ script = ExtResource("1_wovta")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1815589621]
 texture_filter = 1
-scale = Vector2(0.5, 0.5)
-texture = ExtResource("1_m1htj")
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("2_3l8kd")
 
 [node name="PatrolPoints" type="Node2D" parent="." unique_id=2099912311]
 

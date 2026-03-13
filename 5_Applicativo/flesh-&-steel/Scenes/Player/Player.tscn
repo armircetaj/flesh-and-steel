@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cal73drss36sm" path="res://Scripts/player/Player.cs" id="1_kyqiw"]
 [ext_resource type="Texture2D" uid="uid://gou6yfvwlb7q" path="res://Assets/sprites/Fs_Fr_Idle.png" id="1_rpqav"]
-[ext_resource type="PackedScene" path="res://Scenes/Player/Projectile.tscn" id="3_h54ih"]
+[ext_resource type="PackedScene" uid="uid://4qaoob71t87j" path="res://Scenes/Player/Projectile.tscn" id="3_h54ih"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_kyqiw"]
 radius = 16.0

@@ -31,4 +31,4 @@ grow_horizontal = 0
 script = ExtResource("5_minimap")
 
 [node name="Enemy" parent="." unique_id=1986832523 instance=ExtResource("4_pbw6q")]
-position = Vector2(-249, -117)
+position = Vector2(-249, -126)

@@ -9,7 +9,7 @@ public partial class Player : CharacterBody2D
 	[Export] public PackedScene ProjectileScene;
 	[Export] public float ShootCooldown = 0.7f;
 	[Export] public float ProjectileSpawnOffset = 20f;
-
+	
 	private float _shootCooldownTimer = 0f;
 	private Vector2 _lastMoveDirection = Vector2.Down;
 
