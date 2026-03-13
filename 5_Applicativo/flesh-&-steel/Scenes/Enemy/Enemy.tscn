@@ -6,6 +6,9 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_xeo28"]
 radius = 20.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_vision"]
+radius = 160.0
+
 [node name="Enemy" type="CharacterBody2D" unique_id=1986832523]
 script = ExtResource("1_wovta")
 
@@ -16,9 +19,17 @@ texture_filter = 1
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_m1htj")
 
+[node name="PatrolPoints" type="Node2D" parent="." unique_id=2099912311]
+
 [node name="AttackArea" type="Area2D" parent="." unique_id=1508026773]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea" unique_id=875065580]
 position = Vector2(0, 3)
 shape = SubResource("CircleShape2D_xeo28")
 debug_color = Color(0.8177589, 0.03928564, 0.18393132, 0.41960785)
+
+[node name="VisionArea" type="Area2D" parent="." unique_id=1355723312]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="VisionArea" unique_id=1355723313]
+shape = SubResource("CircleShape2D_vision")
+debug_color = Color(0.2, 0.6, 1, 0.15)
