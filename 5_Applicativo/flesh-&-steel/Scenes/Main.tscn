@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://wfcw5ylmiwfg" path="res://Scenes/Enemy/Enemy.tscn" id="4_pbw6q"]
 [ext_resource type="Script" uid="uid://cerjoj4cxpb3u" path="res://Scripts/RoomManager.cs" id="4_rgh2o"]
 [ext_resource type="Script" uid="uid://by6me4xy4bbe0" path="res://Scripts/MiniMap.cs" id="5_minimap"]
+[ext_resource type="PackedScene" uid="uid://b2wd36eap4344" path="res://Scenes/HeartsHUD.tscn" id="6_hearts"]
 
 [node name="Main" type="Node2D" unique_id=1967902986]
 
@@ -29,6 +30,8 @@ offset_right = 27.0
 offset_bottom = 64.0
 grow_horizontal = 0
 script = ExtResource("5_minimap")
+
+[node name="HeartsHUD" parent="." unique_id=1000000002 instance=ExtResource("6_hearts")]
 
 [node name="Enemy" parent="." unique_id=1986832523 instance=ExtResource("4_pbw6q")]
 position = Vector2(-249, -126)

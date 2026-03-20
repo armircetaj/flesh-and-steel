@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://b2wd36eap4344"]
+
+[ext_resource type="Texture2D" uid="uid://crfs44xlkvq0p" path="res://Assets/ui/heart.png" id="1_ffbss"]
+[ext_resource type="Script" uid="uid://r7qjgj8jxfgf" path="res://Scripts/HeartsHud.cs" id="1_m37v3"]
+
+[node name="HeartsHUD" type="CanvasLayer" unique_id=1211954589]
+script = ExtResource("1_m37v3")
+
+[node name="HeartsContainer" type="HBoxContainer" parent="." unique_id=1430091349]
+separation = 4.0
+offset_right = 12.0
+offset_bottom = 12.0
+
+[node name="Heart1" type="TextureRect" parent="HeartsContainer" unique_id=1613115227]
+layout_mode = 0
+custom_minimum_size = Vector2(24, 24)
+texture = ExtResource("1_ffbss")
+
+[node name="Heart2" type="TextureRect" parent="HeartsContainer" unique_id=619973991]
+layout_mode = 0
+custom_minimum_size = Vector2(24, 24)
+texture = ExtResource("1_ffbss")
+
+[node name="Heart3" type="TextureRect" parent="HeartsContainer" unique_id=1425577418]
+layout_mode = 0
+custom_minimum_size = Vector2(24, 24)
+texture = ExtResource("1_ffbss")
+
+[node name="Heart4" type="TextureRect" parent="HeartsContainer" unique_id=243774891]
+layout_mode = 0
+custom_minimum_size = Vector2(24, 24)
+texture = ExtResource("1_ffbss")
+
+[node name="Heart5" type="TextureRect" parent="HeartsContainer" unique_id=372192162]
+layout_mode = 0
+custom_minimum_size = Vector2(24, 24)
+texture = ExtResource("1_ffbss")

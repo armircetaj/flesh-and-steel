@@ -4,12 +4,23 @@ using System;
 public partial class Enemy : CharacterBody2D
 {
 	[Export] public float PatrolSpeed = 70f;
-	[Export] public float ChaseSpeed = 100f;
+	[Export] public float ChaseSpeed = 110f;
 	[Export] public float ArriveDistance = 6.5f;
 	[Export] public Vector2 PerimeterHalfSize = new Vector2(220, 110);
 
+	[Export] public float AttackCooldown = 1.0f;
+	[Export] public int Damage = 1;
+	[Export] public float AttackFreezeDuration = 1f;
+	[Export] public float AttackMoveMultiplier = 0.2f;
+	[Export] public float AttackRecoveryRampDuration = 0.6f;
+
 	private Player _player;
 	private Area2D _visionArea;
+	private Area2D _attackArea;
+
+	private float _attackCooldownTimer = 0f;
+	private float _attackSlowTimer = 0f;
+	private float _attackRecoveryTimer = 0f;
 	
 	private int _patrolIndex = 0;
 	private Vector2[] _perimeterPoints = Array.Empty<Vector2>();
@@ -19,6 +30,7 @@ public partial class Enemy : CharacterBody2D
 	{
 		_player = GetNodeOrNull<Player>("/root/Main/Player");
 		_visionArea = GetNodeOrNull<Area2D>("VisionArea");
+		_attackArea = GetNodeOrNull<Area2D>("AttackArea");
 
 		_roomCenter = (GetParent() is Node2D p) ? p.GlobalPosition : Vector2.Zero;
 
@@ -36,6 +48,30 @@ public partial class Enemy : CharacterBody2D
 		if (_player == null)
 			return;
 
+		float d = (float)delta;
+		if (_attackCooldownTimer > 0f)
+			_attackCooldownTimer -= d;
+
+		float prevAttackSlowTimer = _attackSlowTimer;
+		if (_attackSlowTimer > 0f)
+			_attackSlowTimer -= d;
+
+		bool canAttackNow = _attackArea != null && _attackArea.OverlapsBody(_player) && _attackCooldownTimer <= 0f;
+
+		if (canAttackNow)
+		{
+			_attackCooldownTimer = AttackCooldown;
+			_attackSlowTimer = AttackFreezeDuration;
+			_attackRecoveryTimer = 0f;
+			_player.TakeDamage(Damage, GlobalPosition);
+		}
+
+		if (prevAttackSlowTimer > 0f && _attackSlowTimer <= 0f && AttackRecoveryRampDuration > 0f)
+			_attackRecoveryTimer = AttackRecoveryRampDuration;
+
+		if (_attackRecoveryTimer > 0f)
+			_attackRecoveryTimer -= d;
+
 		bool seePlayer = _visionArea != null && _visionArea.OverlapsBody(_player);
 
 		Vector2 target;
@@ -51,6 +87,22 @@ public partial class Enemy : CharacterBody2D
 			target = GetNextPatrolTarget();
 			speed = PatrolSpeed;
 		}
+
+		float speedMultiplier = 1.0f;
+		bool isInAttackSlowWindow = canAttackNow || _attackSlowTimer > 0f;
+		if (isInAttackSlowWindow)
+		{
+			speedMultiplier = AttackMoveMultiplier;
+		}
+		else if (_attackRecoveryTimer > 0f && AttackRecoveryRampDuration > 0f)
+		{
+			float t = 1.0f - (_attackRecoveryTimer / AttackRecoveryRampDuration);
+			t = Mathf.Clamp(t, 0f, 1f);
+			t = t * t * (3f - 2f * t);
+			speedMultiplier = Mathf.Lerp(AttackMoveMultiplier, 1.0f, t);
+		}
+
+		speed *= speedMultiplier;
 
 		MoveTo(target, speed);
 		MoveAndSlide();
