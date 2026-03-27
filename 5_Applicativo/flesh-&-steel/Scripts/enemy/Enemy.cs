@@ -3,10 +3,8 @@ using System;
 
 public partial class Enemy : CharacterBody2D
 {
-	[Export] public float PatrolSpeed = 70f;
 	[Export] public float ChaseSpeed = 110f;
 	[Export] public float ArriveDistance = 6.5f;
-	[Export] public Vector2 PerimeterHalfSize = new Vector2(220, 110);
 
 	[Export] public float AttackCooldown = 1.0f;
 	[Export] public int Damage = 1;
@@ -14,33 +12,34 @@ public partial class Enemy : CharacterBody2D
 	[Export] public float AttackMoveMultiplier = 0.2f;
 	[Export] public float AttackRecoveryRampDuration = 0.6f;
 
+	[Export] public int MaxHealth = 5;
+
+	[Export] public float SpawnFreezeTime = 0.5f;
+	[Export] public float SpawnRampDuration = 0.6f;
+
+	[Export] public float KnockbackDecay = 800f;
+
+	public event Action Died;
+
 	private Player _player;
-	private Area2D _visionArea;
 	private Area2D _attackArea;
 
 	private float _attackCooldownTimer = 0f;
 	private float _attackSlowTimer = 0f;
 	private float _attackRecoveryTimer = 0f;
-	
-	private int _patrolIndex = 0;
-	private Vector2[] _perimeterPoints = Array.Empty<Vector2>();
-	private Vector2 _roomCenter;
+
+	private int _currentHealth;
+	private float _spawnFreezeTimer;
+	private float _spawnRampTimer = 0f;
+	private Vector2 _knockbackVelocity = Vector2.Zero;
 
 	public override void _Ready()
 	{
+		_currentHealth = MaxHealth;
+		_spawnFreezeTimer = SpawnFreezeTime;
+
 		_player = GetNodeOrNull<Player>("/root/Main/Player");
-		_visionArea = GetNodeOrNull<Area2D>("VisionArea");
 		_attackArea = GetNodeOrNull<Area2D>("AttackArea");
-
-		_roomCenter = (GetParent() is Node2D p) ? p.GlobalPosition : Vector2.Zero;
-
-		_perimeterPoints = new Vector2[]
-		{
-			_roomCenter + new Vector2(-PerimeterHalfSize.X, -PerimeterHalfSize.Y),
-			_roomCenter + new Vector2(+PerimeterHalfSize.X, -PerimeterHalfSize.Y),
-			_roomCenter + new Vector2(+PerimeterHalfSize.X, +PerimeterHalfSize.Y),
-			_roomCenter + new Vector2(-PerimeterHalfSize.X, +PerimeterHalfSize.Y),
-		};
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -49,6 +48,15 @@ public partial class Enemy : CharacterBody2D
 			return;
 
 		float d = (float)delta;
+
+		if (_spawnFreezeTimer > 0f)
+		{
+			_spawnFreezeTimer -= d;
+			if (_spawnFreezeTimer <= 0f)
+				_spawnRampTimer = SpawnRampDuration;
+			return;
+		}
+
 		if (_attackCooldownTimer > 0f)
 			_attackCooldownTimer -= d;
 
@@ -72,55 +80,61 @@ public partial class Enemy : CharacterBody2D
 		if (_attackRecoveryTimer > 0f)
 			_attackRecoveryTimer -= d;
 
-		bool seePlayer = _visionArea != null && _visionArea.OverlapsBody(_player);
-
-		Vector2 target;
-		float speed;
-
-		if (seePlayer)
-		{
-			target = _player.GlobalPosition;
-			speed = ChaseSpeed;
-		}
-		else
-		{
-			target = GetNextPatrolTarget();
-			speed = PatrolSpeed;
-		}
-
+		float speed = ChaseSpeed;
 		float speedMultiplier = 1.0f;
+
+		if (_spawnRampTimer > 0f)
+		{
+			_spawnRampTimer -= d;
+			float t = 1.0f - Mathf.Clamp(_spawnRampTimer / SpawnRampDuration, 0f, 1f);
+			t = t * t * (3f - 2f * t);
+			speedMultiplier = t;
+		}
+
 		bool isInAttackSlowWindow = canAttackNow || _attackSlowTimer > 0f;
 		if (isInAttackSlowWindow)
 		{
-			speedMultiplier = AttackMoveMultiplier;
+			speedMultiplier *= AttackMoveMultiplier;
 		}
 		else if (_attackRecoveryTimer > 0f && AttackRecoveryRampDuration > 0f)
 		{
 			float t = 1.0f - (_attackRecoveryTimer / AttackRecoveryRampDuration);
 			t = Mathf.Clamp(t, 0f, 1f);
 			t = t * t * (3f - 2f * t);
-			speedMultiplier = Mathf.Lerp(AttackMoveMultiplier, 1.0f, t);
+			speedMultiplier *= Mathf.Lerp(AttackMoveMultiplier, 1.0f, t);
 		}
 
 		speed *= speedMultiplier;
 
-		MoveTo(target, speed);
+		MoveTo(_player.GlobalPosition, speed);
+
+		Velocity += _knockbackVelocity;
+		if (_knockbackVelocity.Length() > 1f)
+			_knockbackVelocity = _knockbackVelocity.MoveToward(Vector2.Zero, KnockbackDecay * d);
+		else
+			_knockbackVelocity = Vector2.Zero;
+
 		MoveAndSlide();
 	}
 
-	private Vector2 GetNextPatrolTarget()
+	public void TakeDamage(int amount = 1)
 	{
-		if (_perimeterPoints.Length > 0)
+		if (_currentHealth <= 0)
+			return;
+
+		_currentHealth -= amount;
+
+		if (_currentHealth <= 0)
 		{
-			Vector2 target = _perimeterPoints[_patrolIndex];
-			if (GlobalPosition.DistanceTo(target) <= ArriveDistance)
-			{
-				_patrolIndex = (_patrolIndex + 1) % _perimeterPoints.Length;
-				target = _perimeterPoints[_patrolIndex];
-			}
-			return target;
+			_currentHealth = 0;
+			Died?.Invoke();
+			QueueFree();
 		}
-		return GlobalPosition;
+	}
+
+	public void ApplyKnockback(Vector2 direction, float strength)
+	{
+		_knockbackVelocity = direction.Normalized() * strength;
 	}
 
 	private void MoveTo(Vector2 targetGlobalPos, float speed)

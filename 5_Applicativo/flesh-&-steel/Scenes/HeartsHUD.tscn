@@ -13,25 +13,25 @@ offset_bottom = 12.0
 
 [node name="Heart1" type="TextureRect" parent="HeartsContainer" unique_id=1613115227]
 layout_mode = 0
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(12, 12)
 texture = ExtResource("1_ffbss")
 
 [node name="Heart2" type="TextureRect" parent="HeartsContainer" unique_id=619973991]
 layout_mode = 0
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(12, 12)
 texture = ExtResource("1_ffbss")
 
 [node name="Heart3" type="TextureRect" parent="HeartsContainer" unique_id=1425577418]
 layout_mode = 0
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(12, 12)
 texture = ExtResource("1_ffbss")
 
 [node name="Heart4" type="TextureRect" parent="HeartsContainer" unique_id=243774891]
 layout_mode = 0
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(12, 12)
 texture = ExtResource("1_ffbss")
 
 [node name="Heart5" type="TextureRect" parent="HeartsContainer" unique_id=372192162]
 layout_mode = 0
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(12, 12)
 texture = ExtResource("1_ffbss")

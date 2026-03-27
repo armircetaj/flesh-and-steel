@@ -1,10 +1,23 @@
 [gd_scene format=3 uid="uid://bmsrh0x8eo2sq"]
 
 [ext_resource type="PackedScene" uid="uid://cfpftj1h61kgn" path="res://Scenes/Player/Player.tscn" id="1_r150o"]
-[ext_resource type="PackedScene" uid="uid://wfcw5ylmiwfg" path="res://Scenes/Enemy/Enemy.tscn" id="4_pbw6q"]
 [ext_resource type="Script" uid="uid://cerjoj4cxpb3u" path="res://Scripts/RoomManager.cs" id="4_rgh2o"]
 [ext_resource type="Script" uid="uid://by6me4xy4bbe0" path="res://Scripts/MiniMap.cs" id="5_minimap"]
-[ext_resource type="PackedScene" uid="uid://b2wd36eap4344" path="res://Scenes/HeartsHUD.tscn" id="6_hearts"]
+[ext_resource type="PackedScene" path="res://Scenes/HeartsHUD.tscn" id="6_hearts"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tfbg"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.15, 0.15, 0.15, 0.8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tffill"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.3, 0.75, 1, 1)
 
 [node name="Main" type="Node2D" unique_id=1967902986]
 
@@ -31,7 +44,19 @@ offset_bottom = 64.0
 grow_horizontal = 0
 script = ExtResource("5_minimap")
 
-[node name="HeartsHUD" parent="." unique_id=1000000002 instance=ExtResource("6_hearts")]
+[node name="TransformBar" type="ProgressBar" parent="UI" unique_id=1788799228]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -10.0
+offset_right = 64.0
+offset_bottom = -4.0
+grow_vertical = 0
+theme_override_styles/background = SubResource("StyleBoxFlat_tfbg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_tffill")
+value = 100.0
+show_percentage = false
 
-[node name="Enemy" parent="." unique_id=1986832523 instance=ExtResource("4_pbw6q")]
-position = Vector2(-249, -126)
+[node name="HeartsHUD" parent="." unique_id=1000000002 instance=ExtResource("6_hearts")]

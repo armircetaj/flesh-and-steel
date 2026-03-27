@@ -104,16 +104,6 @@ public partial class MiniMap : Control
 			return isVisited ? visitedRoomTex : unvisitedBossRoomTex;
 		}
 
-		if (isCurrent)
-		{
-			return currentRoomTex;
-		}
-
-		if (isVisited)
-		{
-			return visitedRoomTex;
-		}
-
-		return unvisitedRoomTex;
+		return isCurrent ? currentRoomTex : (isVisited ? visitedRoomTex : unvisitedRoomTex);
 	}
 }

@@ -40,6 +40,11 @@ public partial class Projectile : Area2D
 		if (body is Player)
 			return;
 
+		if (body is Enemy enemy)
+		{
+			enemy.TakeDamage(1);
+		}
+
 		if (ExplosionScene != null)
 		{
 			var explosion = ExplosionScene.Instantiate<Node2D>();

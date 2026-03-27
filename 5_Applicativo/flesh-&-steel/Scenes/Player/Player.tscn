@@ -7,6 +7,9 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_kyqiw"]
 radius = 16.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_dash"]
+radius = 20.0
+
 [node name="Player" type="CharacterBody2D" unique_id=557256397]
 script = ExtResource("1_kyqiw")
 ProjectileScene = ExtResource("3_h54ih")
@@ -20,4 +23,11 @@ z_index = 12
 texture_filter = 1
 texture = ExtResource("1_rpqav")
 
-[node name="Health" type="Node" parent="." unique_id=269088708]
+[node name="DashHitbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DashHitbox"]
+shape = SubResource("CircleShape2D_dash")
+disabled = true
