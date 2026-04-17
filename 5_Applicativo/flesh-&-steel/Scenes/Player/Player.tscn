@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cal73drss36sm" path="res://Scripts/player/Player.cs" id="1_kyqiw"]
 [ext_resource type="Texture2D" uid="uid://gou6yfvwlb7q" path="res://Assets/sprites/Fs_Fr_Idle.png" id="1_rpqav"]
 [ext_resource type="PackedScene" uid="uid://4qaoob71t87j" path="res://Scenes/Player/Projectile.tscn" id="3_h54ih"]
+[ext_resource type="PackedScene" uid="uid://ciae3kepk15ea" path="res://Scenes/Player/Transformation.tscn" id="4_transform"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_kyqiw"]
 radius = 16.0
@@ -13,6 +14,7 @@ radius = 20.0
 [node name="Player" type="CharacterBody2D" unique_id=557256397]
 script = ExtResource("1_kyqiw")
 ProjectileScene = ExtResource("3_h54ih")
+TransformationScene = ExtResource("4_transform")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1733472007]
 z_index = 4

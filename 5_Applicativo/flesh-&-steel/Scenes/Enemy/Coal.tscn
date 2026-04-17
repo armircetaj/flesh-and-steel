@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://8756s12umuqx" path="res://Scripts/enemy/Enemy.cs" id="1_wovta"]
 [ext_resource type="Texture2D" uid="uid://bhu1kb6uwpbhx" path="res://Assets/sprites/Fr_Co_Idle.png" id="2_3l8kd"]
+[ext_resource type="PackedScene" uid="uid://c4fbeqefsgxet" path="res://Scenes/Enemy/CoalDeath.tscn" id="3_death"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 12.0
@@ -13,6 +14,7 @@ radius = 20.0
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("1_wovta")
+DeathScene = ExtResource("3_death")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=568836280]
 shape = SubResource("CircleShape2D_body")

@@ -20,6 +20,7 @@ public partial class Player : CharacterBody2D
 	[Export] public float AimGraceDuration = 0.5f;
 
 	[Export] public int MaxHealth = 5;
+	[Export] public float InvincibilityDuration = 1.0f;
 
 	[Export] public PackedScene ProjectileScene;
 	[Export] public float ShootCooldown = 0.7f;
@@ -32,6 +33,7 @@ public partial class Player : CharacterBody2D
 	[Export] public float DashKnockbackStrength = 300f;
 
 	[Export] public float TransformCooldown = 6.0f;
+	[Export] public PackedScene TransformationScene;
 
 	[Export] public float MaxStamina = 100f;
 	[Export] public float DashStaminaCost = 25f;
@@ -69,6 +71,9 @@ public partial class Player : CharacterBody2D
 	private float _transformCooldownTimer = 0f;
 	private float _currentStamina;
 	private ProgressBar _transformBar;
+	private float _invincibilityTimer = 0f;
+	private bool _isTransforming = false;
+	private AnimatedSprite2D _transformAnim = null;
 
 	public override void _Ready()
 	{
@@ -102,6 +107,15 @@ public partial class Player : CharacterBody2D
 		HandleTransformInput(d);
 		HandleStamina(d);
 
+		if (_invincibilityTimer > 0f)
+			_invincibilityTimer -= d;
+
+		if (_isTransforming)
+		{
+			Velocity = Vector2.Zero;
+			return;
+		}
+
 		if (_isDashing)
 		{
 			HandleDashMovement(d);
@@ -118,14 +132,74 @@ public partial class Player : CharacterBody2D
 		if (_transformCooldownTimer > 0f)
 			_transformCooldownTimer -= delta;
 
-		if (Input.IsActionJustPressed("transform") && _transformCooldownTimer <= 0f && !_isDashing)
+		if (Input.IsActionJustPressed("transform") && _transformCooldownTimer <= 0f && !_isDashing && !_isTransforming)
 		{
-			_currentState = _currentState == PlayerState.Flesh ? PlayerState.Steel : PlayerState.Flesh;
-			_transformCooldownTimer = TransformCooldown;
-			_shootCooldownTimer = 0f;
-			_dashCooldownTimer = 0f;
-			UpdateFacingSprite(_lastMoveDirection);
+			StartTransformation();
 		}
+	}
+
+	private void StartTransformation()
+	{
+		_isTransforming = true;
+		_invincibilityTimer = 999f;
+		Velocity = Vector2.Zero;
+
+		if (_sprite != null)
+			_sprite.Visible = false;
+
+		if (TransformationScene != null)
+		{
+			_transformAnim = TransformationScene.Instantiate<AnimatedSprite2D>();
+			_transformAnim.SpriteFrames.SetAnimationLoop("transformation", false);
+			_transformAnim.ZIndex = 12;
+			_transformAnim.TextureFilter = CanvasItem.TextureFilterEnum.Nearest;
+			_transformAnim.Position = Vector2.Zero;
+			AddChild(_transformAnim);
+			_transformAnim.AnimationFinished += OnTransformAnimFinished;
+
+			if (_currentState == PlayerState.Flesh)
+			{
+				_transformAnim.Play("transformation");
+			}
+			else
+			{
+				int lastFrame = _transformAnim.SpriteFrames.GetFrameCount("transformation") - 1;
+				_transformAnim.Frame = lastFrame;
+				_transformAnim.FrameProgress = 0.0f;
+				_transformAnim.Play("transformation", -1.0f);
+			}
+		}
+		else
+		{
+			FinishTransformation();
+		}
+	}
+
+	private void OnTransformAnimFinished()
+	{
+		FinishTransformation();
+	}
+
+	private void FinishTransformation()
+	{
+		_currentState = _currentState == PlayerState.Flesh ? PlayerState.Steel : PlayerState.Flesh;
+		_transformCooldownTimer = TransformCooldown;
+		_shootCooldownTimer = 0f;
+		_dashCooldownTimer = 0f;
+		_isTransforming = false;
+		_invincibilityTimer = 0.2f;
+
+		if (_sprite != null)
+			_sprite.Visible = true;
+
+		if (_transformAnim != null)
+		{
+			_transformAnim.AnimationFinished -= OnTransformAnimFinished;
+			_transformAnim.QueueFree();
+			_transformAnim = null;
+		}
+
+		UpdateFacingSprite(_lastMoveDirection);
 	}
 
 	private void HandleStamina(float delta)
@@ -343,8 +417,10 @@ public partial class Player : CharacterBody2D
 		if (amount <= 0 || _currentHealth <= 0)
 			return;
 
-		if (_isDashing)
+		if (_isDashing || _isTransforming || _invincibilityTimer > 0f)
 			return;
+
+		_invincibilityTimer = InvincibilityDuration;
 
 		int actualDamage = Mathf.Min(amount, _currentHealth);
 		_currentHealth -= actualDamage;

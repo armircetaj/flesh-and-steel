@@ -72,7 +72,7 @@ public partial class RoomManager : Node
 		startRoom = GD.Load<PackedScene>("res://Scenes/Rooms/StartRoom.tscn");
 		combatRoom = GD.Load<PackedScene>("res://Scenes/Rooms/CombatRoom.tscn");
 		bossRoom = GD.Load<PackedScene>("res://Scenes/Rooms/BossRoom.tscn");
-		_enemyScene = GD.Load<PackedScene>("res://Scenes/Enemy/Enemy.tscn");
+		_enemyScene = GD.Load<PackedScene>("res://Scenes/Enemy/Coal.tscn");
 
 		_topRoomTex = GD.Load<Texture2D>("res://Assets/ui/TopRoom.png");
 		_bottomRoomTex = GD.Load<Texture2D>("res://Assets/ui/BottomRoom.png");
