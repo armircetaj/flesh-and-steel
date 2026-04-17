@@ -12,7 +12,7 @@ radius = 20.0
 
 [node name="Enemy" type="CharacterBody2D" unique_id=1986832523]
 collision_layer = 2
-collision_mask = 0
+collision_mask = 1
 script = ExtResource("1_wovta")
 DeathScene = ExtResource("3_death")
 

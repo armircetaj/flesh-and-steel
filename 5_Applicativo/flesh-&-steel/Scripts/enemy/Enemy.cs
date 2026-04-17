@@ -52,6 +52,9 @@ public partial class Enemy : CharacterBody2D
 		_attackArea = GetNodeOrNull<Area2D>("AttackArea");
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite2D");
 
+		if (_player != null)
+			AddCollisionExceptionWith(_player);
+
 		if (_sprite != null)
 			_defaultModulate = _sprite.Modulate;
 	}

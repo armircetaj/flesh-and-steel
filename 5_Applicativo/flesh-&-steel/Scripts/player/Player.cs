@@ -32,7 +32,6 @@ public partial class Player : CharacterBody2D
 	[Export] public int DashDamage = 2;
 	[Export] public float DashKnockbackStrength = 300f;
 
-	[Export] public float TransformCooldown = 6.0f;
 	[Export] public PackedScene TransformationScene;
 
 	[Export] public float MaxStamina = 100f;
@@ -52,7 +51,10 @@ public partial class Player : CharacterBody2D
 	private Texture2D _fleshTexRight;
 	private Texture2D _fleshTexUp;
 	private Texture2D _fleshTexDown;
-	private Texture2D _steelTex;
+	private Texture2D _steelTexLeft;
+	private Texture2D _steelTexRight;
+	private Texture2D _steelTexUp;
+	private Texture2D _steelTexDown;
 
 	private float _slowTimer = 0f;
 	private float _shootCooldownTimer = 0f;
@@ -68,7 +70,6 @@ public partial class Player : CharacterBody2D
 	private Area2D _dashHitbox;
 	private HashSet<ulong> _dashHitEnemies = new();
 
-	private float _transformCooldownTimer = 0f;
 	private float _currentStamina;
 	private ProgressBar _transformBar;
 	private float _invincibilityTimer = 0f;
@@ -88,7 +89,10 @@ public partial class Player : CharacterBody2D
 		_fleshTexRight = GD.Load<Texture2D>("res://Assets/sprites/Fs_Ri_Idle.png");
 		_fleshTexUp = GD.Load<Texture2D>("res://Assets/sprites/Fs_Ba_Idle.png");
 		_fleshTexDown = GD.Load<Texture2D>("res://Assets/sprites/Fs_Fr_Idle.png");
-		_steelTex = GD.Load<Texture2D>("res://Assets/sprites/St_Fr_Idle.png");
+		_steelTexLeft = GD.Load<Texture2D>("res://Assets/sprites/St_Le_Idle.png");
+		_steelTexRight = GD.Load<Texture2D>("res://Assets/sprites/St_Ri_Idle.png");
+		_steelTexUp = GD.Load<Texture2D>("res://Assets/sprites/St_Ba_Idle.png");
+		_steelTexDown = GD.Load<Texture2D>("res://Assets/sprites/St_Fr_Idle.png");
 
 		_dashHitbox = GetNodeOrNull<Area2D>("DashHitbox");
 		if (_dashHitbox != null)
@@ -129,11 +133,9 @@ public partial class Player : CharacterBody2D
 
 	private void HandleTransformInput(float delta)
 	{
-		if (_transformCooldownTimer > 0f)
-			_transformCooldownTimer -= delta;
-
-		if (Input.IsActionJustPressed("transform") && _transformCooldownTimer <= 0f && !_isDashing && !_isTransforming)
+		if (Input.IsActionJustPressed("transform") && _currentStamina >= MaxStamina && !_isDashing && !_isTransforming)
 		{
+			_currentStamina = 0f;
 			StartTransformation();
 		}
 	}
@@ -183,7 +185,6 @@ public partial class Player : CharacterBody2D
 	private void FinishTransformation()
 	{
 		_currentState = _currentState == PlayerState.Flesh ? PlayerState.Steel : PlayerState.Flesh;
-		_transformCooldownTimer = TransformCooldown;
 		_shootCooldownTimer = 0f;
 		_dashCooldownTimer = 0f;
 		_isTransforming = false;
@@ -475,7 +476,15 @@ public partial class Player : CharacterBody2D
 	private Texture2D GetTextureForFacing(FacingDir dir)
 	{
 		if (_currentState == PlayerState.Steel)
-			return _steelTex;
+		{
+			return dir switch
+			{
+				FacingDir.Left => _steelTexLeft,
+				FacingDir.Right => _steelTexRight,
+				FacingDir.Up => _steelTexUp,
+				_ => _steelTexDown
+			};
+		}
 
 		return dir switch
 		{
