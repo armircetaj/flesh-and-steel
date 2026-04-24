@@ -4,6 +4,7 @@ using System.Collections.Generic;
 public partial class Player : CharacterBody2D
 {
 	public enum PlayerState { Flesh, Steel }
+	public enum DamageType { Melee, Ranged }
 
 	[Export] public float FleshMaxSpeed = 180f;
 	[Export] public float SteelMaxSpeed = 110f;
@@ -410,16 +411,26 @@ public partial class Player : CharacterBody2D
 
 	public void TakeDamage(int amount = 1)
 	{
-		TakeDamage(amount, GlobalPosition);
+		TakeDamage(amount, GlobalPosition, DamageType.Melee);
 	}
 
 	public void TakeDamage(int amount, Vector2 sourcePosition)
+	{
+		TakeDamage(amount, sourcePosition, DamageType.Melee);
+	}
+
+	public void TakeDamage(int amount, Vector2 sourcePosition, DamageType damageType)
 	{
 		if (amount <= 0 || _currentHealth <= 0)
 			return;
 
 		if (_isDashing || _isTransforming || _invincibilityTimer > 0f)
 			return;
+
+		if (_currentState == PlayerState.Flesh && damageType == DamageType.Melee)
+			amount *= 2;
+		else if (_currentState == PlayerState.Steel && damageType == DamageType.Ranged)
+			amount *= 2;
 
 		_invincibilityTimer = InvincibilityDuration;
 

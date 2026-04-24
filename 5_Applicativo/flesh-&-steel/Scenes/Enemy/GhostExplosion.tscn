@@ -1,0 +1,107 @@
+[gd_scene format=3 uid="uid://ro4vym432h2l"]
+
+[ext_resource type="Texture2D" uid="uid://bgp8yvdws5gwd" path="res://Assets/sprites/GhostExplosion-Sheet.png" id="1_pj7og"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cg27m"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kpkl1"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5phd5"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j3q4r"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ct1vy"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0dtuh"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(80, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gtq61"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(96, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wsp12"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(112, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5iifb"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(128, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rak53"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(144, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6mngi"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(160, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mkepf"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(176, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4v58h"]
+atlas = ExtResource("1_pj7og")
+region = Rect2(192, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ts2kb"]
+animations = [{
+"frames": [{
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_cg27m")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_kpkl1")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_5phd5")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_j3q4r")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_ct1vy")
+}, {
+"duration": 0.7,
+"texture": SubResource("AtlasTexture_0dtuh")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_gtq61")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_wsp12")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_5iifb")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_rak53")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_6mngi")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_mkepf")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_4v58h")
+}],
+"loop": false,
+"name": &"ghostexplosion",
+"speed": 13.0
+}]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" unique_id=334063222]
+sprite_frames = SubResource("SpriteFrames_ts2kb")
+animation = &"ghostexplosion"
+frame_progress = 0.20478584

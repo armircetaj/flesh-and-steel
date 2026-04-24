@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/enemy/GhostProjectile.cs" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://drb2b4rfahsoi" path="res://Assets/sprites/GhostProjectile.png" id="2_sprite"]
+[ext_resource type="PackedScene" uid="uid://ro4vym432h2l" path="res://Scenes/Enemy/GhostExplosion.tscn" id="3_explosion"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 9.0
+
+[node name="GhostProjectile" type="Area2D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1_script")
+ExplosionScene = ExtResource("3_explosion")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_sprite")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")

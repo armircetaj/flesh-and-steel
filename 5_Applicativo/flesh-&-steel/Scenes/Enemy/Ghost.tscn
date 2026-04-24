@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/enemy/Ghost.cs" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://b2ua23jbufsk1" path="res://Assets/sprites/Gh_Fr_Idle.png" id="2_sprite"]
+[ext_resource type="PackedScene" uid="uid://dfudo7vs3gm8b" path="res://Scenes/Enemy/GhostDeath.tscn" id="3_death"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemy/GhostProjectile.tscn" id="4_projectile"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 10.0
+
+[node name="Ghost" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_script")
+DeathScene = ExtResource("3_death")
+ProjectileScene = ExtResource("4_projectile")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("2_sprite")

@@ -44,6 +44,10 @@ public partial class Projectile : Area2D
 		{
 			enemy.TakeDamage(1);
 		}
+		else if (body is Ghost ghost)
+		{
+			ghost.TakeDamage(1);
+		}
 
 		if (ExplosionScene != null)
 		{

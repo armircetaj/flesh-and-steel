@@ -1,18 +1,17 @@
 using Godot;
 using System;
 
-public partial class Enemy : CharacterBody2D
+public partial class Ghost : CharacterBody2D
 {
-	[Export] public float ChaseSpeed = 110f;
-	[Export] public float ArriveDistance = 6.5f;
+	[Export] public float MoveSpeed = 90f;
+	[Export] public float PreferredDistance = 110f;
+	[Export] public float MinDistance = 70f;
+	[Export] public float MaxDistance = 140f;
 
-	[Export] public float AttackCooldown = 1.0f;
+	[Export] public float ShootCooldown = 2.5f;
 	[Export] public int Damage = 1;
-	[Export] public float AttackFreezeDuration = 1f;
-	[Export] public float AttackMoveMultiplier = 0.2f;
-	[Export] public float AttackRecoveryRampDuration = 0.6f;
 
-	[Export] public int MaxHealth = 4;
+	[Export] public int MaxHealth = 3;
 
 	[Export] public float SpawnFreezeTime = 0.5f;
 	[Export] public float SpawnRampDuration = 0.6f;
@@ -24,21 +23,20 @@ public partial class Enemy : CharacterBody2D
 
 	[Export] public float HitFlashDuration = 0.5f;
 	[Export] public PackedScene DeathScene;
+	[Export] public PackedScene ProjectileScene;
 
 	public event Action Died;
 
 	private Player _player;
-	private Area2D _attackArea;
 	private Sprite2D _sprite;
-
-	private float _attackCooldownTimer = 0f;
-	private float _attackSlowTimer = 0f;
-	private float _attackRecoveryTimer = 0f;
 
 	private int _currentHealth;
 	private float _spawnFreezeTimer;
 	private float _spawnRampTimer = 0f;
+	private float _shootCooldownTimer = 0f;
 	private Vector2 _knockbackVelocity = Vector2.Zero;
+	private int _strafeDirection = 1;
+	private float _strafeChangeTimer = 0f;
 
 	private Tween _flashTween;
 	private Color _defaultModulate;
@@ -47,9 +45,9 @@ public partial class Enemy : CharacterBody2D
 	{
 		_currentHealth = MaxHealth;
 		_spawnFreezeTimer = SpawnFreezeTime;
+		_shootCooldownTimer = ShootCooldown * 0.5f;
 
 		_player = GetNodeOrNull<Player>("/root/Main/Player");
-		_attackArea = GetNodeOrNull<Area2D>("AttackArea");
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite2D");
 
 		if (_player != null)
@@ -57,6 +55,9 @@ public partial class Enemy : CharacterBody2D
 
 		if (_sprite != null)
 			_defaultModulate = _sprite.Modulate;
+
+		_strafeDirection = GD.Randf() > 0.5f ? 1 : -1;
+		_strafeChangeTimer = (float)GD.RandRange(2.0, 4.0);
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -74,56 +75,8 @@ public partial class Enemy : CharacterBody2D
 			return;
 		}
 
-		if (_attackCooldownTimer > 0f)
-			_attackCooldownTimer -= d;
-
-		float prevAttackSlowTimer = _attackSlowTimer;
-		if (_attackSlowTimer > 0f)
-			_attackSlowTimer -= d;
-
-		bool canAttackNow = _attackArea != null && _attackArea.OverlapsBody(_player) && _attackCooldownTimer <= 0f;
-
-		if (canAttackNow)
-		{
-			_attackCooldownTimer = AttackCooldown;
-			_attackSlowTimer = AttackFreezeDuration;
-			_attackRecoveryTimer = 0f;
-			_player.TakeDamage(Damage, GlobalPosition, Player.DamageType.Melee);
-		}
-
-		if (prevAttackSlowTimer > 0f && _attackSlowTimer <= 0f && AttackRecoveryRampDuration > 0f)
-			_attackRecoveryTimer = AttackRecoveryRampDuration;
-
-		if (_attackRecoveryTimer > 0f)
-			_attackRecoveryTimer -= d;
-
-		float speed = ChaseSpeed;
-		float speedMultiplier = 1.0f;
-
-		if (_spawnRampTimer > 0f)
-		{
-			_spawnRampTimer -= d;
-			float t = 1.0f - Mathf.Clamp(_spawnRampTimer / SpawnRampDuration, 0f, 1f);
-			t = t * t * (3f - 2f * t);
-			speedMultiplier = t;
-		}
-
-		bool isInAttackSlowWindow = canAttackNow || _attackSlowTimer > 0f;
-		if (isInAttackSlowWindow)
-		{
-			speedMultiplier *= AttackMoveMultiplier;
-		}
-		else if (_attackRecoveryTimer > 0f && AttackRecoveryRampDuration > 0f)
-		{
-			float t = 1.0f - (_attackRecoveryTimer / AttackRecoveryRampDuration);
-			t = Mathf.Clamp(t, 0f, 1f);
-			t = t * t * (3f - 2f * t);
-			speedMultiplier *= Mathf.Lerp(AttackMoveMultiplier, 1.0f, t);
-		}
-
-		speed *= speedMultiplier;
-
-		MoveTo(_player.GlobalPosition, speed);
+		HandleShooting(d);
+		HandleMovement(d);
 
 		Velocity += GetSeparationForce();
 
@@ -134,6 +87,74 @@ public partial class Enemy : CharacterBody2D
 			_knockbackVelocity = Vector2.Zero;
 
 		MoveAndSlide();
+	}
+
+	private void HandleMovement(float d)
+	{
+		Vector2 toPlayer = _player.GlobalPosition - GlobalPosition;
+		float dist = toPlayer.Length();
+		Vector2 dirToPlayer = toPlayer.Normalized();
+
+		Vector2 strafeDir = new Vector2(-dirToPlayer.Y, dirToPlayer.X) * _strafeDirection;
+
+		_strafeChangeTimer -= d;
+		if (_strafeChangeTimer <= 0f)
+		{
+			_strafeDirection *= -1;
+			_strafeChangeTimer = (float)GD.RandRange(2.0, 4.0);
+		}
+
+		Vector2 moveDir;
+
+		if (dist < MinDistance)
+		{
+			float urgency = Mathf.Clamp(1.0f - dist / MinDistance, 0f, 1f);
+			moveDir = (-dirToPlayer * urgency + strafeDir * (1f - urgency)).Normalized();
+		}
+		else if (dist > MaxDistance)
+		{
+			float urgency = Mathf.Clamp((dist - MaxDistance) / 40f, 0f, 1f);
+			moveDir = (dirToPlayer * urgency + strafeDir * (1f - urgency)).Normalized();
+		}
+		else
+		{
+			float center = (MinDistance + MaxDistance) * 0.5f;
+			float drift = (dist - center) / (MaxDistance - MinDistance) * 0.3f;
+			moveDir = (strafeDir + dirToPlayer * drift).Normalized();
+		}
+
+		float speed = MoveSpeed;
+		float speedMultiplier = 1.0f;
+
+		if (_spawnRampTimer > 0f)
+		{
+			_spawnRampTimer -= d;
+			float t = 1.0f - Mathf.Clamp(_spawnRampTimer / SpawnRampDuration, 0f, 1f);
+			t = t * t * (3f - 2f * t);
+			speedMultiplier = t;
+		}
+
+		Velocity = moveDir * speed * speedMultiplier;
+	}
+
+	private void HandleShooting(float d)
+	{
+		if (_shootCooldownTimer > 0f)
+		{
+			_shootCooldownTimer -= d;
+			return;
+		}
+
+		if (ProjectileScene == null)
+			return;
+
+		Vector2 dirToPlayer = (_player.GlobalPosition - GlobalPosition).Normalized();
+		var projectile = ProjectileScene.Instantiate<GhostProjectile>();
+		projectile.GlobalPosition = GlobalPosition + dirToPlayer * 15f;
+		projectile.Initialize(dirToPlayer, Damage);
+		GetTree().CurrentScene.AddChild(projectile);
+
+		_shootCooldownTimer = ShootCooldown;
 	}
 
 	public void TakeDamage(int amount = 1)
@@ -175,7 +196,10 @@ public partial class Enemy : CharacterBody2D
 	private void SpawnDeathEffect()
 	{
 		if (DeathScene == null)
+		{
+			GD.Print("Ghost DeathScene is NULL!");
 			return;
+		}
 
 		var death = DeathScene.Instantiate<Node2D>();
 		death.GlobalPosition = GlobalPosition;
@@ -195,8 +219,12 @@ public partial class Enemy : CharacterBody2D
 			var tween = anim.CreateTween();
 			tween.TweenProperty(anim, "modulate", new Color(1f, 1f, 1f, 1f), 0.3f);
 
-			anim.Play("coaldeath");
+			anim.Play("ghostdeath");
 			anim.AnimationFinished += () => anim.QueueFree();
+		}
+		else
+		{
+			GD.Print("Ghost death is NOT AnimatedSprite2D, it is: " + death.GetType().Name);
 		}
 	}
 
@@ -236,14 +264,5 @@ public partial class Enemy : CharacterBody2D
 		}
 
 		return separation * SeparationStrength;
-	}
-
-	private void MoveTo(Vector2 targetGlobalPos, float speed)
-	{
-		Vector2 dir = targetGlobalPos - GlobalPosition;
-		if (dir.Length() <= ArriveDistance)
-			Velocity = Vector2.Zero;
-		else
-			Velocity = dir.Normalized() * speed;
 	}
 }

@@ -30,7 +30,8 @@ public partial class RoomManager : Node
 	private PackedScene startRoom;
 	private PackedScene combatRoom;
 	private PackedScene bossRoom;
-	private PackedScene _enemyScene;
+	private PackedScene _coalScene;
+	private PackedScene _ghostScene;
 
 	private Node2D currentRoomInstance;
 	private ulong _roomChangeCooldownUntilMs = 0;
@@ -53,16 +54,7 @@ public partial class RoomManager : Node
 	private Texture2D _bottomLeftBossRoomTex;
 	private Texture2D _bottomRightBossRoomTex;
 
-	private Texture2D _topRoomLockedTex;
-	private Texture2D _bottomRoomLockedTex;
-	private Texture2D _leftRoomLockedTex;
-	private Texture2D _rightRoomLockedTex;
-	private Texture2D _topLeftRoomLockedTex;
-	private Texture2D _topRightRoomLockedTex;
-	private Texture2D _bottomLeftRoomLockedTex;
-	private Texture2D _bottomRightRoomLockedTex;
-
-	private List<Enemy> _activeEnemies = new();
+	private List<Node2D> _activeEnemies = new();
 	private int _aliveEnemyCount = 0;
 
 	private RandomNumberGenerator _rng = new();
@@ -72,7 +64,8 @@ public partial class RoomManager : Node
 		startRoom = GD.Load<PackedScene>("res://Scenes/Rooms/StartRoom.tscn");
 		combatRoom = GD.Load<PackedScene>("res://Scenes/Rooms/CombatRoom.tscn");
 		bossRoom = GD.Load<PackedScene>("res://Scenes/Rooms/BossRoom.tscn");
-		_enemyScene = GD.Load<PackedScene>("res://Scenes/Enemy/Coal.tscn");
+		_coalScene = GD.Load<PackedScene>("res://Scenes/Enemy/Coal.tscn");
+		_ghostScene = GD.Load<PackedScene>("res://Scenes/Enemy/Ghost.tscn");
 
 		_topRoomTex = GD.Load<Texture2D>("res://Assets/ui/TopRoom.png");
 		_bottomRoomTex = GD.Load<Texture2D>("res://Assets/ui/BottomRoom.png");
@@ -88,14 +81,6 @@ public partial class RoomManager : Node
 		_bottomLeftBossRoomTex = GD.Load<Texture2D>("res://Assets/ui/BottomLeftBossRoom.png");
 		_bottomRightBossRoomTex = GD.Load<Texture2D>("res://Assets/ui/BottomRightBossRoom.png");
 
-		_topRoomLockedTex = GD.Load<Texture2D>("res://Assets/ui/TopRoomLocked.png");
-		_bottomRoomLockedTex = GD.Load<Texture2D>("res://Assets/ui/BottomRoomLocked.png");
-		_leftRoomLockedTex = GD.Load<Texture2D>("res://Assets/ui/LeftRoomLocked.png");
-		_rightRoomLockedTex = GD.Load<Texture2D>("res://Assets/ui/RightRoomLocked.png");
-		_topLeftRoomLockedTex = GD.Load<Texture2D>("res://Assets/ui/TopLeftRoomLocked.png");
-		_topRightRoomLockedTex = GD.Load<Texture2D>("res://Assets/ui/TopRightRoomLocked.png");
-		_bottomLeftRoomLockedTex = GD.Load<Texture2D>("res://Assets/ui/BottomLeftRoomLocked.png");
-		_bottomRightRoomLockedTex = GD.Load<Texture2D>("res://Assets/ui/BottomRightRoomLocked.png");
 
 		_rng.Randomize();
 		GenerateMap();
@@ -134,10 +119,14 @@ public partial class RoomManager : Node
 
 	private void LoadRoom(int x, int y, EntrySide entrySideInTarget)
 	{
-		foreach (var enemy in _activeEnemies)
+		foreach (var tracked in _activeEnemies)
 		{
-			if (IsInstanceValid(enemy))
-				enemy.Died -= OnEnemyDied;
+			if (!IsInstanceValid(tracked))
+				continue;
+			if (tracked is Enemy coal)
+				coal.Died -= OnEnemyDied;
+			else if (tracked is Ghost ghost)
+				ghost.Died -= OnEnemyDied;
 		}
 		_activeEnemies.Clear();
 		_aliveEnemyCount = 0;
@@ -165,9 +154,8 @@ public partial class RoomManager : Node
 
 		SpawnEnemiesForRoom();
 
-		bool roomLocked = _aliveEnemyCount > 0;
-		UpdateRoomBackgroundSprite(x, y, map[x, y], roomLocked);
-		UpdateDoorsForCurrentRoom();
+		UpdateRoomBackgroundSprite(x, y, map[x, y]);
+		UpdateDoorsForCurrentRoom(false);
 		SpawnPlayer(entrySideInTarget);
 	}
 
@@ -202,11 +190,24 @@ public partial class RoomManager : Node
 
 		for (int i = 0; i < count; i++)
 		{
-			var enemy = _enemyScene.Instantiate<Enemy>();
-			currentRoomInstance.AddChild(enemy);
-			enemy.GlobalPosition = spawnPoints[i];
-			enemy.Died += OnEnemyDied;
-			_activeEnemies.Add(enemy);
+			bool spawnGhost = i > 0 && _rng.Randf() < 0.4f;
+
+			if (spawnGhost)
+			{
+				var ghost = _ghostScene.Instantiate<Ghost>();
+				currentRoomInstance.AddChild(ghost);
+				ghost.GlobalPosition = spawnPoints[i];
+				ghost.Died += OnEnemyDied;
+				_activeEnemies.Add(ghost);
+			}
+			else
+			{
+				var coal = _coalScene.Instantiate<Enemy>();
+				currentRoomInstance.AddChild(coal);
+				coal.GlobalPosition = spawnPoints[i];
+				coal.Died += OnEnemyDied;
+				_activeEnemies.Add(coal);
+			}
 		}
 
 		_aliveEnemyCount = count;
@@ -221,8 +222,7 @@ public partial class RoomManager : Node
 			_aliveEnemyCount = 0;
 			cleared[currentX, currentY] = true;
 
-			UpdateDoorsForCurrentRoom();
-			UpdateRoomBackgroundSprite(currentX, currentY, map[currentX, currentY], false);
+			UpdateDoorsForCurrentRoom(true);
 		}
 	}
 
@@ -235,7 +235,7 @@ public partial class RoomManager : Node
 		}
 	}
 
-	private void UpdateRoomBackgroundSprite(int x, int y, RoomType roomType, bool locked)
+	private void UpdateRoomBackgroundSprite(int x, int y, RoomType roomType)
 	{
 		if (currentRoomInstance == null)
 			return;
@@ -244,12 +244,7 @@ public partial class RoomManager : Node
 		if (bgSprite == null)
 			return;
 
-		Texture2D tex;
-		if (locked)
-			tex = GetLockedRoomBackground(x, y);
-		else
-			tex = GetRoomBackgroundForCell(roomType, x, y);
-
+		Texture2D tex = GetRoomBackgroundForCell(roomType, x, y);
 		if (tex != null)
 			bgSprite.Texture = tex;
 	}
@@ -282,70 +277,57 @@ public partial class RoomManager : Node
 		return null;
 	}
 
-	private Texture2D GetLockedRoomBackground(int x, int y)
-	{
-		if (x == 1 && y == 0) return _topRoomLockedTex;
-		if (x == 1 && y == 2) return _bottomRoomLockedTex;
-		if (x == 0 && y == 1) return _leftRoomLockedTex;
-		if (x == 2 && y == 1) return _rightRoomLockedTex;
 
-		if (x == 0 && y == 0) return _topLeftRoomLockedTex;
-		if (x == 2 && y == 0) return _topRightRoomLockedTex;
-		if (x == 0 && y == 2) return _bottomLeftRoomLockedTex;
-		if (x == 2 && y == 2) return _bottomRightRoomLockedTex;
-
-		return null;
-	}
-
-	private void UpdateDoorsForCurrentRoom()
+	private void UpdateDoorsForCurrentRoom(bool playUnlockAnimation = false)
 	{
 		if (currentRoomInstance == null)
 			return;
 
-		var doors = currentRoomInstance.GetNodeOrNull<Node2D>("Doors");
-		if (doors == null)
+		var doorsNode = currentRoomInstance.GetNodeOrNull<Node2D>("Doors");
+		if (doorsNode == null)
 			return;
 
-		if (_aliveEnemyCount > 0)
+		var doorInfos = new (string name, int dx, int dy)[]
 		{
-			SetDoorEnabled(doors, "DoorTop", false);
-			SetDoorEnabled(doors, "DoorBottom", false);
-			SetDoorEnabled(doors, "DoorLeft", false);
-			SetDoorEnabled(doors, "DoorRight", false);
-			return;
+			("DoorTop",    0, -1),
+			("DoorBottom", 0,  1),
+			("DoorLeft",  -1,  0),
+			("DoorRight",  1,  0)
+		};
+
+		foreach (var (name, dx, dy) in doorInfos)
+		{
+			var door = doorsNode.GetNodeOrNull<Door>(name);
+			if (door == null)
+				continue;
+
+			int nx = currentX + dx;
+			int ny = currentY + dy;
+
+			bool hasNeighbor = nx >= 0 && nx < 3 && ny >= 0 && ny < 3;
+
+			if (!hasNeighbor)
+			{
+				door.Hide();
+				continue;
+			}
+
+			bool neighborIsBoss = map[nx, ny] == RoomType.Boss;
+			bool bossLocked = neighborIsBoss && !IsFloorCleared();
+
+			if (bossLocked)
+			{
+				door.Lock(true);
+			}
+			else if (_aliveEnemyCount > 0)
+			{
+				door.Lock(false);
+			}
+			else
+			{
+				door.Unlock(playUnlockAnimation, neighborIsBoss);
+			}
 		}
-
-		bool canGoUp = currentY > 0;
-		bool canGoDown = currentY < 2;
-		bool canGoLeft = currentX > 0;
-		bool canGoRight = currentX < 2;
-
-		if (canGoUp && map[currentX, currentY - 1] == RoomType.Boss && !IsFloorCleared())
-			canGoUp = false;
-		if (canGoDown && map[currentX, currentY + 1] == RoomType.Boss && !IsFloorCleared())
-			canGoDown = false;
-		if (canGoLeft && map[currentX - 1, currentY] == RoomType.Boss && !IsFloorCleared())
-			canGoLeft = false;
-		if (canGoRight && map[currentX + 1, currentY] == RoomType.Boss && !IsFloorCleared())
-			canGoRight = false;
-
-		SetDoorEnabled(doors, "DoorTop", canGoUp);
-		SetDoorEnabled(doors, "DoorBottom", canGoDown);
-		SetDoorEnabled(doors, "DoorLeft", canGoLeft);
-		SetDoorEnabled(doors, "DoorRight", canGoRight);
-	}
-
-	private void SetDoorEnabled(Node2D doorsRoot, string doorName, bool enabled)
-	{
-		var door = doorsRoot.GetNodeOrNull<Area2D>(doorName);
-		if (door == null)
-			return;
-
-		door.SetDeferred("monitoring", enabled);
-
-		var shape = door.GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
-		if (shape != null)
-			shape.SetDeferred("disabled", !enabled);
 	}
 
 	private bool IsFloorCleared()
