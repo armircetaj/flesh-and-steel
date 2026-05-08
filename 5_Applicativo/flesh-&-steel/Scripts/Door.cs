@@ -21,6 +21,7 @@ public partial class Door : Area2D
 	private AnimatedSprite2D _unlockAnim;
 	private bool _isLocked = false;
 	private bool _isBossDoor = false;
+	private bool _pendingBossUnlocked = false;
 
 	public event Action UnlockAnimationFinished;
 
@@ -59,6 +60,7 @@ public partial class Door : Area2D
 
 		if (playAnimation && _isLocked)
 		{
+			_pendingBossUnlocked = showBossUnlocked;
 			PlayUnlockAnimation();
 		}
 		else
@@ -194,6 +196,12 @@ public partial class Door : Area2D
 			_unlockAnim.Visible = false;
 			_unlockAnim.QueueFree();
 			_unlockAnim = null;
+		}
+
+		if (_pendingBossUnlocked)
+		{
+			ShowBossUnlocked();
+			_pendingBossUnlocked = false;
 		}
 
 		EnableDoor();
