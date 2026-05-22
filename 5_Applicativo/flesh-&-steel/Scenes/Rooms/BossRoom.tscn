@@ -93,3 +93,6 @@ debug_color = Color(1, 0, 0.10686197, 0.41960785)
 
 [node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1051029102]
 z_index = -2
+
+[node name="BossSpawn" type="Marker2D" parent="."]
+position = Vector2(0, -10)

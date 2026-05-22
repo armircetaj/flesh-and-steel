@@ -45,6 +45,7 @@ public partial class Player : CharacterBody2D
 	private int _currentHealth;
 	private HeartsHud _heartsHud;
 	private Sprite2D _sprite;
+	public bool IsInvincibleCheat = false;
 	private Color _defaultSpriteModulate = new Color(1, 1, 1, 1);
 	private Tween _flashTween;
 
@@ -396,17 +397,28 @@ public partial class Player : CharacterBody2D
 
 	private void OnDashHitboxBodyEntered(Node2D body)
 	{
-		if (body is not Enemy enemy)
+		ulong id = body.GetInstanceId();
+		if (_dashHitEnemies.Contains(id))
 			return;
 
-		if (_dashHitEnemies.Contains(enemy.GetInstanceId()))
-			return;
+		_dashHitEnemies.Add(id);
+		Vector2 knockDir = (body.GlobalPosition - GlobalPosition).Normalized();
 
-		_dashHitEnemies.Add(enemy.GetInstanceId());
-		enemy.TakeDamage(DashDamage);
-
-		Vector2 knockDir = (enemy.GlobalPosition - GlobalPosition).Normalized();
-		enemy.ApplyKnockback(knockDir, DashKnockbackStrength);
+		if (body is Enemy enemy)
+		{
+			enemy.TakeDamage(DashDamage);
+			enemy.ApplyKnockback(knockDir, DashKnockbackStrength);
+		}
+		else if (body is Ghost ghost)
+		{
+			ghost.TakeDamage(DashDamage);
+			ghost.ApplyKnockback(knockDir, DashKnockbackStrength);
+		}
+		else if (body is Warden warden)
+		{
+			warden.TakeDamage(DashDamage, fromDash: true);
+			warden.ApplyKnockback(knockDir, DashKnockbackStrength);
+		}
 	}
 
 	public void TakeDamage(int amount = 1)
@@ -424,7 +436,7 @@ public partial class Player : CharacterBody2D
 		if (amount <= 0 || _currentHealth <= 0)
 			return;
 
-		if (_isDashing || _isTransforming || _invincibilityTimer > 0f)
+		if (_isDashing || _isTransforming || _invincibilityTimer > 0f || IsInvincibleCheat)
 			return;
 
 		if (_currentState == PlayerState.Flesh && damageType == DamageType.Melee)
@@ -442,9 +454,29 @@ public partial class Player : CharacterBody2D
 
 		if (_currentHealth <= 0)
 		{
-			_currentHealth = MaxHealth;
-			_heartsHud?.ResetHearts();
+			_currentHealth = 0;
+			_heartsHud?.SetHearts(0);
+
+			var endgame = GetNodeOrNull<EndgameOverlay>("/root/Main/EndgameOverlay");
+			if (endgame != null)
+			{
+				endgame.TriggerGameOver();
+			}
+			else
+			{
+				// Fallback if overlay is missing
+				_currentHealth = MaxHealth;
+				_heartsHud?.ResetHearts();
+				GD.PrintErr("EndgameOverlay not found! Resetting health instead.");
+			}
+			return;
 		}
+	}
+
+	public void FullHeal()
+	{
+		_currentHealth = MaxHealth;
+		_heartsHud?.SetHearts(_currentHealth);
 	}
 
 	private void ApplyHitEffects(Vector2 sourcePosition)

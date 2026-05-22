@@ -1,0 +1,88 @@
+[gd_scene format=3 uid="uid://bufux5a6wxrf"]
+
+[ext_resource type="Script" uid="uid://cnhbov2y3pcbd" path="res://Scripts/UI/ModMenu.cs" id="1_a1b2c"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0, 0, 0, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+
+[sub_resource type="Theme" id="Theme_modmenu"]
+Button/styles/hover = SubResource("StyleBoxFlat_btn")
+Button/styles/normal = SubResource("StyleBoxFlat_btn")
+Button/styles/pressed = SubResource("StyleBoxFlat_btn")
+CheckButton/styles/hover = SubResource("StyleBoxFlat_btn")
+CheckButton/styles/normal = SubResource("StyleBoxFlat_btn")
+CheckButton/styles/pressed = SubResource("StyleBoxFlat_btn")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1b2c3"]
+bg_color = Color(0.121569, 0.121569, 0.121569, 0.862745)
+
+[node name="ModMenu" type="CanvasLayer" unique_id=1000000003]
+layer = 128
+script = ExtResource("1_a1b2c")
+
+[node name="MenuPanel" type="Panel" parent="." unique_id=1000000004]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -97.0
+offset_top = -110.0
+offset_right = 27.0
+offset_bottom = 27.0
+grow_horizontal = 0
+grow_vertical = 0
+theme = SubResource("Theme_modmenu")
+theme_override_styles/panel = SubResource("StyleBoxFlat_1b2c3")
+
+[node name="Title" type="Label" parent="MenuPanel" unique_id=1000000005]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 1.0
+offset_top = 2.0
+offset_right = 1.0
+offset_bottom = 18.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+text = "- CHEAT MENU -"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MenuPanel" unique_id=1000000006]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.5
+offset_top = 22.0
+offset_right = -3.5
+offset_bottom = -11.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 2
+
+[node name="BtnKillEnemies" type="Button" parent="MenuPanel/VBoxContainer" unique_id=1000000007]
+layout_mode = 2
+text = "Kill Room Enemies"
+
+[node name="BtnClearRooms" type="Button" parent="MenuPanel/VBoxContainer" unique_id=1000000008]
+layout_mode = 2
+text = "Clear Combat Rooms"
+
+[node name="BtnKillBoss" type="Button" parent="MenuPanel/VBoxContainer" unique_id=1000000009]
+layout_mode = 2
+text = "Kill Boss"
+
+[node name="BtnFullHeal" type="Button" parent="MenuPanel/VBoxContainer" unique_id=1000000010]
+layout_mode = 2
+text = "Full Heal"
+
+[node name="CheckInvincibility" type="CheckButton" parent="MenuPanel/VBoxContainer" unique_id=1000000011]
+layout_mode = 2
+text = "Invincibility"
+alignment = 1

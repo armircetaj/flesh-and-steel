@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/enemy/Warden.cs" id="1_script"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/Warden_Shield.png" id="2_sprite"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemy/GhostProjectile.tscn" id="3_projectile"]
+[ext_resource type="PackedScene" uid="uid://wfcw5ylmiwfg" path="res://Scenes/Enemy/Coal.tscn" id="4_coal"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 18.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_attack"]
+radius = 30.0
+
+[node name="Warden" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_script")
+ProjectileScene = ExtResource("3_projectile")
+CoalScene = ExtResource("4_coal")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(2, 2)
+texture = ExtResource("2_sprite")
+
+[node name="AttackArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
+shape = SubResource("CircleShape2D_attack")

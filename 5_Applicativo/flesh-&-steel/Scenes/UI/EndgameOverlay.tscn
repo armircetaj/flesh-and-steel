@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://caqpl0p8w2wpt"]
+
+[ext_resource type="Script" uid="uid://buw17mat63svb" path="res://Scripts/UI/EndgameOverlay.cs" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0, 0, 0, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+
+[sub_resource type="Theme" id="Theme_endgame"]
+Button/styles/hover = SubResource("StyleBoxFlat_btn")
+Button/styles/normal = SubResource("StyleBoxFlat_btn")
+Button/styles/pressed = SubResource("StyleBoxFlat_btn")
+
+[node name="EndgameOverlay" type="CanvasLayer" unique_id=2013409677]
+process_mode = 3
+layer = 100
+visible = false
+script = ExtResource("1_script")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1084307335]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1940201464]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_endgame")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=1347891792]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1076860229]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "DEAD"
+horizontal_alignment = 1
+
+[node name="MenuButton" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1866691647]
+layout_mode = 2
+text = "Main Menu"

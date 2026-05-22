@@ -32,6 +32,7 @@ public partial class RoomManager : Node
 	private PackedScene bossRoom;
 	private PackedScene _coalScene;
 	private PackedScene _ghostScene;
+	private PackedScene _wardenScene;
 
 	private Node2D currentRoomInstance;
 	private ulong _roomChangeCooldownUntilMs = 0;
@@ -66,6 +67,7 @@ public partial class RoomManager : Node
 		bossRoom = GD.Load<PackedScene>("res://Scenes/Rooms/BossRoom.tscn");
 		_coalScene = GD.Load<PackedScene>("res://Scenes/Enemy/Coal.tscn");
 		_ghostScene = GD.Load<PackedScene>("res://Scenes/Enemy/Ghost.tscn");
+		_wardenScene = GD.Load<PackedScene>("res://Scenes/Enemy/Warden.tscn");
 
 		_topRoomTex = GD.Load<Texture2D>("res://Assets/ui/TopRoom.png");
 		_bottomRoomTex = GD.Load<Texture2D>("res://Assets/ui/BottomRoom.png");
@@ -127,6 +129,8 @@ public partial class RoomManager : Node
 				coal.Died -= OnEnemyDied;
 			else if (tracked is Ghost ghost)
 				ghost.Died -= OnEnemyDied;
+			else if (tracked is Warden warden)
+				warden.Died -= OnEnemyDied;
 		}
 		_activeEnemies.Clear();
 		_aliveEnemyCount = 0;
@@ -153,6 +157,9 @@ public partial class RoomManager : Node
 		visited[x, y] = true;
 
 		SpawnEnemiesForRoom();
+
+		if (map[x, y] == RoomType.Boss)
+			SpawnBoss();
 
 		UpdateRoomBackgroundSprite(x, y, map[x, y]);
 		UpdateDoorsForCurrentRoom(false);
@@ -213,6 +220,42 @@ public partial class RoomManager : Node
 		_aliveEnemyCount = count;
 	}
 
+	private void SpawnBoss()
+	{
+		if (currentRoomInstance == null || _wardenScene == null)
+			return;
+
+		if (cleared[currentX, currentY])
+			return;
+
+		var spawnMarker = currentRoomInstance.GetNodeOrNull<Marker2D>("BossSpawn");
+		if (spawnMarker == null)
+			spawnMarker = currentRoomInstance.GetNodeOrNull<Marker2D>("PlayerSpawn");
+		Vector2 spawnPos = spawnMarker != null ? spawnMarker.GlobalPosition : Vector2.Zero;
+
+		var warden = _wardenScene.Instantiate<Warden>();
+		currentRoomInstance.AddChild(warden);
+		warden.GlobalPosition = spawnPos;
+		warden.Died += OnEnemyDied;
+		warden.Died += OnBossDied;
+		_activeEnemies.Add(warden);
+		_aliveEnemyCount = 1;
+	}
+
+	private void OnBossDied()
+	{
+		// Wait a brief moment before triggering victory so the explosion finishes
+		var timer = GetTree().CreateTimer(2.5f);
+		timer.Timeout += () => 
+		{
+			var endgame = GetNodeOrNull<EndgameOverlay>("/root/Main/EndgameOverlay");
+			if (endgame != null)
+			{
+				endgame.TriggerVictory();
+			}
+		};
+	}
+
 	private void OnEnemyDied()
 	{
 		_aliveEnemyCount--;
@@ -224,6 +267,58 @@ public partial class RoomManager : Node
 
 			UpdateDoorsForCurrentRoom(true);
 		}
+	}
+
+	public void KillAllEnemiesInCurrentRoom()
+	{
+		// Copy list to avoid concurrent modification issues when enemies remove themselves
+		var enemiesToKill = new List<Node2D>(_activeEnemies);
+		foreach (var enemyNode in enemiesToKill)
+		{
+			if (!IsInstanceValid(enemyNode))
+				continue;
+
+			if (enemyNode is Enemy coal)
+				coal.TakeDamage(9999);
+			else if (enemyNode is Ghost ghost)
+				ghost.TakeDamage(9999);
+			else if (enemyNode is Warden warden)
+				warden.TakeDamage(9999, fromDash: false);
+		}
+	}
+
+	public void KillBoss()
+	{
+		var enemiesToKill = new List<Node2D>(_activeEnemies);
+		foreach (var enemyNode in enemiesToKill)
+		{
+			if (IsInstanceValid(enemyNode) && enemyNode is Warden warden)
+			{
+				warden.TakeDamage(9999, fromDash: false);
+			}
+		}
+	}
+
+	public void ClearAllRoomsExceptBoss()
+	{
+		for (int x = 0; x < 3; x++)
+		{
+			for (int y = 0; y < 3; y++)
+			{
+				if (map[x, y] == RoomType.Combat)
+				{
+					cleared[x, y] = true;
+				}
+			}
+		}
+
+		// Force the doors in the current room to update in case we are in a combat room
+		if (map[currentX, currentY] == RoomType.Combat && _aliveEnemyCount > 0)
+		{
+			KillAllEnemiesInCurrentRoom();
+		}
+		
+		UpdateDoorsForCurrentRoom(true);
 	}
 
 	private void ShuffleList<T>(List<T> list)
@@ -312,6 +407,13 @@ public partial class RoomManager : Node
 				continue;
 			}
 
+			if (map[currentX, currentY] == RoomType.Boss)
+			{
+				door.Lock(false);
+				door.Hide();
+				continue;
+			}
+
 			bool neighborIsBoss = map[nx, ny] == RoomType.Boss;
 			bool bossLocked = neighborIsBoss && !IsFloorCleared();
 
@@ -346,6 +448,8 @@ public partial class RoomManager : Node
 	private void SpawnPlayer(EntrySide entrySideInTarget)
 	{
 		Node2D player = GetNode<Node2D>("../Player");
+		if (player is CharacterBody2D cb)
+			cb.Velocity = Vector2.Zero;
 
 		if(entrySideInTarget == EntrySide.None)
 		{
@@ -425,7 +529,37 @@ public partial class RoomManager : Node
 	private void ApplyPendingRoomChange()
 	{
 		_roomChangeQueued = false;
-		LoadRoom(_pendingX, _pendingY, _pendingEntrySide);
+		PerformRoomTransitionAsync(_pendingX, _pendingY, _pendingEntrySide);
+	}
+
+	private async void PerformRoomTransitionAsync(int targetX, int targetY, EntrySide entrySide)
+	{
+		GetTree().Paused = true;
+
+		var transitionLayer = new CanvasLayer() { Layer = 110 };
+		var colorRect = new ColorRect()
+		{
+			Color = new Color(0, 0, 0, 0),
+		};
+		colorRect.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+		transitionLayer.AddChild(colorRect);
+		GetTree().CurrentScene.AddChild(transitionLayer);
+
+		var tweenIn = CreateTween();
+		tweenIn.SetPauseMode(Tween.TweenPauseMode.Process);
+		tweenIn.TweenProperty(colorRect, "color", new Color(0, 0, 0, 1), 0.3f);
+		await ToSignal(tweenIn, Tween.SignalName.Finished);
+
+		LoadRoom(targetX, targetY, entrySide);
+
+		var tweenOut = CreateTween();
+		tweenOut.SetPauseMode(Tween.TweenPauseMode.Process);
+		tweenOut.TweenProperty(colorRect, "color", new Color(0, 0, 0, 0), 0.3f);
+		await ToSignal(tweenOut, Tween.SignalName.Finished);
+
+		transitionLayer.QueueFree();
+		GetTree().Paused = false;
+		StartRoomChangeCooldown();
 	}
 
 	public void GoUp()

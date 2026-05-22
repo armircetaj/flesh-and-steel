@@ -48,6 +48,10 @@ public partial class Projectile : Area2D
 		{
 			ghost.TakeDamage(1);
 		}
+		else if (body is Warden warden)
+		{
+			warden.TakeDamage(1, fromDash: false);
+		}
 
 		if (ExplosionScene != null)
 		{

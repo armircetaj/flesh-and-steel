@@ -1,0 +1,99 @@
+[gd_scene format=3 uid="uid://cme1nnrf3l5qx"]
+
+[ext_resource type="Script" uid="uid://dwmwi0yptlmsy" path="res://Scripts/UI/MainMenu.cs" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://djk0ou3gtx1fh" path="res://Assets/ui/GameTitle.png" id="2_title"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0, 0, 0, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+
+[sub_resource type="Theme" id="Theme_main"]
+Button/styles/hover = SubResource("StyleBoxFlat_btn")
+Button/styles/normal = SubResource("StyleBoxFlat_btn")
+Button/styles/pressed = SubResource("StyleBoxFlat_btn")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_btn")
+
+[node name="MainMenu" type="Control" unique_id=1315205704]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_main")
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="." unique_id=45773619]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.07, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1285271743]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -46.0
+offset_right = 80.0
+offset_bottom = 106.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="ControlsPanel" type="PanelContainer" parent="VBoxContainer" unique_id=387791865]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ControlsPanel" unique_id=538666358]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="LabelMove" type="Label" parent="VBoxContainer/ControlsPanel/VBoxContainer" unique_id=950858487]
+layout_mode = 2
+text = "WASD to move"
+horizontal_alignment = 1
+
+[node name="LabelAttack" type="Label" parent="VBoxContainer/ControlsPanel/VBoxContainer" unique_id=1963393443]
+layout_mode = 2
+text = "Arrow Keys to attack"
+horizontal_alignment = 1
+
+[node name="LabelTransform" type="Label" parent="VBoxContainer/ControlsPanel/VBoxContainer" unique_id=1918395043]
+layout_mode = 2
+text = "Space to transform"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="VBoxContainer" unique_id=757833763]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="VBoxContainer" unique_id=466542675]
+layout_mode = 2
+text = "Play"
+
+[node name="QuitButton" type="Button" parent="VBoxContainer" unique_id=644678922]
+layout_mode = 2
+text = "Quit"
+
+[node name="TitleImage" type="TextureRect" parent="." unique_id=1722007559]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 0
+offset_left = 53.0
+offset_top = -10.0
+offset_right = 276.0
+offset_bottom = 69.0
+texture = ExtResource("2_title")
+expand_mode = 1
+stretch_mode = 5
