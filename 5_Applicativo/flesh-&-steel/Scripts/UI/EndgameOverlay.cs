@@ -54,6 +54,7 @@ public partial class EndgameOverlay : CanvasLayer
 	private void PlayFadeIn()
 	{
 		Visible = true;
+		_menuButton?.GrabFocus();
 		
 		if (_bgRect != null)
 		{

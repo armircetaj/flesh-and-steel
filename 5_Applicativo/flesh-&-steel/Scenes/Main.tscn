@@ -4,8 +4,8 @@
 [ext_resource type="Script" uid="uid://cerjoj4cxpb3u" path="res://Scripts/RoomManager.cs" id="4_rgh2o"]
 [ext_resource type="Script" uid="uid://by6me4xy4bbe0" path="res://Scripts/MiniMap.cs" id="5_minimap"]
 [ext_resource type="PackedScene" path="res://Scenes/HeartsHUD.tscn" id="6_hearts"]
-[ext_resource type="PackedScene" path="res://Scenes/UI/EndgameOverlay.tscn" id="7_endgame"]
-[ext_resource type="PackedScene" path="res://Scenes/UI/ModMenu.tscn" id="8_modmenu"]
+[ext_resource type="PackedScene" uid="uid://caqpl0p8w2wpt" path="res://Scenes/UI/EndgameOverlay.tscn" id="7_endgame"]
+[ext_resource type="PackedScene" uid="uid://bufux5a6wxrf" path="res://Scenes/UI/ModMenu.tscn" id="8_modmenu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tfbg"]
 content_margin_left = 0.0

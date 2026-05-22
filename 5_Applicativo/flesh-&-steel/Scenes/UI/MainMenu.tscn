@@ -52,28 +52,6 @@ grow_vertical = 2
 theme_override_constants/separation = 5
 alignment = 1
 
-[node name="ControlsPanel" type="PanelContainer" parent="VBoxContainer" unique_id=387791865]
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ControlsPanel" unique_id=538666358]
-layout_mode = 2
-theme_override_constants/separation = 2
-alignment = 1
-
-[node name="LabelMove" type="Label" parent="VBoxContainer/ControlsPanel/VBoxContainer" unique_id=950858487]
-layout_mode = 2
-text = "WASD to move"
-horizontal_alignment = 1
-
-[node name="LabelAttack" type="Label" parent="VBoxContainer/ControlsPanel/VBoxContainer" unique_id=1963393443]
-layout_mode = 2
-text = "Arrow Keys to attack"
-horizontal_alignment = 1
-
-[node name="LabelTransform" type="Label" parent="VBoxContainer/ControlsPanel/VBoxContainer" unique_id=1918395043]
-layout_mode = 2
-text = "Space to transform"
-horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="VBoxContainer" unique_id=757833763]
 custom_minimum_size = Vector2(0, 2)
@@ -97,3 +75,92 @@ offset_bottom = 69.0
 texture = ExtResource("2_title")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="BtnHelp" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -20.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "?"
+
+[node name="ControlsPopup" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -80.0
+offset_right = 100.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ControlsPopup"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlsPopup/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "- CONTROLS -"
+horizontal_alignment = 1
+
+[node name="BtnCloseHelp" type="Button" parent="ControlsPopup/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "X"
+
+[node name="KeyboardLabel" type="Label" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+text = "Keyboard:"
+horizontal_alignment = 1
+
+[node name="LabelMoveK" type="Label" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+text = "Move: WASD"
+horizontal_alignment = 1
+
+[node name="LabelAttackK" type="Label" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+text = "Shoot: Arrow Keys"
+horizontal_alignment = 1
+
+[node name="LabelTransformK" type="Label" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+text = "Transform: Space"
+horizontal_alignment = 1
+
+[node name="ControllerLabel" type="Label" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+text = "Controller:"
+horizontal_alignment = 1
+
+[node name="LabelMoveC" type="Label" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+text = "Move: Left Analog"
+horizontal_alignment = 1
+
+[node name="LabelAttackC" type="Label" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+text = "Shoot: Right D-Pad"
+horizontal_alignment = 1
+
+[node name="LabelTransformC" type="Label" parent="ControlsPopup/VBoxContainer"]
+layout_mode = 2
+text = "Transform: R2/L2"
+horizontal_alignment = 1
