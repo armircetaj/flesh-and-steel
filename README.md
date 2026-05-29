@@ -1,4 +1,4 @@
-<img src="5_Applicativo/flesh-&-steel/Assets/ui/GameTitle.png" alt="Flesh & Steel Logo" width="800">
+<img src="5_Applicativo/flesh-&-steel/Assets/ui/GameTitle.png" alt="Flesh & Steel Logo" width="500">
 
 Progetto a gruppi del 3° anno SAMT.
 Flesh & Steel è un videogioco top-down 2D con meccaniche roguelike, sviluppato utilizzando Godot Engine 4 e C#.
