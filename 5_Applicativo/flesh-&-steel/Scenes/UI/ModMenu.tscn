@@ -31,37 +31,24 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -97.0
-offset_top = -110.0
+offset_left = -102.0
+offset_top = -126.0
 offset_right = 27.0
-offset_bottom = 27.0
+offset_bottom = 25.0
 grow_horizontal = 0
 grow_vertical = 0
 theme = SubResource("Theme_modmenu")
 theme_override_styles/panel = SubResource("StyleBoxFlat_1b2c3")
-
-[node name="Title" type="Label" parent="MenuPanel" unique_id=1000000005]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 1.0
-offset_top = 2.0
-offset_right = 1.0
-offset_bottom = 18.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0, 0, 1)
-text = "- CHEAT MENU -"
-horizontal_alignment = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MenuPanel" unique_id=1000000006]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 3.5
-offset_top = 22.0
-offset_right = -3.5
-offset_bottom = -11.0
+offset_left = 10.5
+offset_top = 17.0
+offset_right = -10.5
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 2

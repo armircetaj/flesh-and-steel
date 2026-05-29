@@ -3,7 +3,8 @@ using System;
 
 public partial class MiniMap : Control
 {
-	[Export] public NodePath RoomManagerPath;
+	[Export] 
+	public NodePath RoomManagerPath;
 
 	private RoomManager roomManager;
 
@@ -21,10 +22,15 @@ public partial class MiniMap : Control
 	public override void _Ready()
 	{
 		backgroundTex = GD.Load<Texture2D>("res://Assets/ui/MiniUI.png");
+		
 		currentRoomTex = GD.Load<Texture2D>("res://Assets/ui/CurrentRoom.png");
+		
 		currentBossRoomTex = GD.Load<Texture2D>("res://Assets/ui/CurrentBossRoom.png");
+		
 		visitedRoomTex = GD.Load<Texture2D>("res://Assets/ui/VisitedRoom.png");
+		
 		unvisitedRoomTex = GD.Load<Texture2D>("res://Assets/ui/UnvisitedRoom.png");
+		
 		unvisitedBossRoomTex = GD.Load<Texture2D>("res://Assets/ui/UnvisitedBossRoom.png");
 
 		if (RoomManagerPath != null && !string.IsNullOrEmpty(RoomManagerPath.ToString()))
@@ -42,6 +48,10 @@ public partial class MiniMap : Control
 		QueueRedraw();
 	}
 
+	/// <summary>
+	/// Disegna dinamicamente la griglia della minimappa 3x3.
+	/// Calcola offset e dimensioni per posizionare correttamente lo sfondo e le singole stanze.
+	/// </summary>
 	public override void _Draw()
 	{
 		if (roomManager == null)
@@ -51,14 +61,17 @@ public partial class MiniMap : Control
 
 		float gridWidth = GridSize * CellSize + (GridSize - 1) * CellPadding;
 		float gridHeight = GridSize * CellSize + (GridSize - 1) * CellPadding;
+		
 		Vector2 gridSize = new Vector2(gridWidth, gridHeight);
 
 		Vector2 bgSize = gridSize + new Vector2(10, 10);
 
 		Vector2 bgOffset = Vector2.Zero;
+		
 		if (backgroundTex != null)
 		{
 			Rect2 bgRect = new Rect2(bgOffset, bgSize);
+			
 			DrawTextureRect(backgroundTex, bgRect, false);
 		}
 
@@ -79,17 +92,19 @@ public partial class MiniMap : Control
 					continue;
 				}
 
-				Vector2 pos = baseOffset + new Vector2(
-					x * (CellSize + CellPadding),
-					y * (CellSize + CellPadding)
-				);
+				Vector2 pos = baseOffset + new Vector2(x * (CellSize + CellPadding), y * (CellSize + CellPadding));
 
 				Rect2 rect = new Rect2(pos, new Vector2(CellSize, CellSize));
+				
 				DrawTextureRect(icon, rect, false);
 			}
 		}
 	}
 
+	/// <summary>
+	/// Seleziona la texture appropriata per ogni cella della mappa in base al tipo di stanza (es. Boss o normale),
+	/// se è la stanza in cui si trova attualmente il giocatore e se è già stata visitata.
+	/// </summary>
 	private Texture2D GetIconForCell(RoomManager.RoomType roomType, bool isVisited, int x, int y, Vector2I current)
 	{
 		bool isCurrent = (current.X == x && current.Y == y);
@@ -101,9 +116,26 @@ public partial class MiniMap : Control
 				return currentBossRoomTex;
 			}
 
-			return isVisited ? visitedRoomTex : unvisitedBossRoomTex;
+			if (isVisited)
+			{
+				return visitedRoomTex;
+			}
+			else
+			{
+				return unvisitedBossRoomTex;
+			}
 		}
 
-		return isCurrent ? currentRoomTex : (isVisited ? visitedRoomTex : unvisitedRoomTex);
+		if (isCurrent)
+		{
+			return currentRoomTex;
+		}
+		
+		if (isVisited)
+		{
+			return visitedRoomTex;
+		}
+		
+		return unvisitedRoomTex;
 	}
 }

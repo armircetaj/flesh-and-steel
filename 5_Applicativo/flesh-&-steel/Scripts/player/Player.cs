@@ -1,45 +1,96 @@
 using Godot;
 using System.Collections.Generic;
 
+// Gestisce l'input, il movimento, il combattimento (sparo e scatto) e la trasformazione (Flesh/Steel).
+// Rispetta il pattern architetturale definendo chiaramente gli stati del giocatore e fungendo da Controller.
 public partial class Player : CharacterBody2D
 {
-	public enum PlayerState { Flesh, Steel }
-	public enum DamageType { Melee, Ranged }
+	public enum PlayerState 
+	{ 
+		Flesh, Steel 
+	}
+	
+	public enum DamageType 
+	{ 
+		Melee, Ranged 
+	}
 
-	[Export] public float FleshMaxSpeed = 180f;
-	[Export] public float SteelMaxSpeed = 110f;
-	[Export] public float Acceleration = 800f;
-	[Export] public float Friction = 475f;
+	[Export] 
+	public float FleshMaxSpeed = 180f;
+	
+	[Export] 
+	public float SteelMaxSpeed = 110f;
+	
+	[Export] 
+	public float Acceleration = 800f;
+	
+	[Export] 
+	public float Friction = 475f;
 
-	[Export] public float SlowDuration = 0.5f;
-	[Export] public float SlowMultiplier = 0.5f;
-	[Export] public float KnockbackStrength = 220f;
+	[Export] 
+	public float SlowDuration = 0.5f;
+	
+	[Export] 
+	public float SlowMultiplier = 0.5f;
+	
+	[Export] 
+	public float KnockbackStrength = 220f;
 
-	[Export] public int BlinkCount = 6;
-	[Export] public float BlinkInterval = 0.05f;
+	[Export] 
+	public int BlinkCount = 6;
+	
+	[Export] 
+	public float BlinkInterval = 0.05f;
 
-	[Export] public float AimGraceDuration = 0.5f;
+	[Export] 
+	public float AimGraceDuration = 0.5f;
 
-	[Export] public int MaxHealth = 5;
-	[Export] public float InvincibilityDuration = 1.0f;
+	[Export] 
+	public int MaxHealth = 5;
+	
+	[Export] 
+	public float InvincibilityDuration = 1.0f;
 
-	[Export] public PackedScene ProjectileScene;
-	[Export] public float ShootCooldown = 0.7f;
-	[Export] public float ProjectileSpawnOffset = 20f;
+	[Export] 
+	public PackedScene ProjectileScene;
+	
+	[Export] 
+	public float ShootCooldown = 0.7f;
+	
+	[Export] 
+	public float ProjectileSpawnOffset = 20f;
 
-	[Export] public float DashDistance = 80f;
-	[Export] public float DashDuration = 0.15f;
-	[Export] public float DashCooldown = 0.6f;
-	[Export] public int DashDamage = 2;
-	[Export] public float DashKnockbackStrength = 300f;
+	[Export] 
+	public float DashDistance = 80f;
+	
+	[Export] 
+	public float DashDuration = 0.15f;
+	
+	[Export] 
+	public float DashCooldown = 0.6f;
+	
+	[Export] 
+	public int DashDamage = 2;
+	
+	[Export] 
+	public float DashKnockbackStrength = 300f;
 
-	[Export] public PackedScene TransformationScene;
+	[Export] 
+	public PackedScene TransformationScene;
 
-	[Export] public float MaxStamina = 100f;
-	[Export] public float DashStaminaCost = 25f;
-	[Export] public float StaminaRegenRate = 15f;
+	[Export] 
+	public float MaxStamina = 100f;
+	
+	[Export] 
+	public float DashStaminaCost = 25f;
+	
+	[Export] 
+	public float StaminaRegenRate = 15f;
 
-	private enum FacingDir { Left, Right, Up, Down }
+	private enum FacingDir 
+	{ 
+		Left, Right, Up, Down 
+	}
 
 	private PlayerState _currentState = PlayerState.Flesh;
 	private int _currentHealth;
@@ -82,27 +133,37 @@ public partial class Player : CharacterBody2D
 	{
 		_currentHealth = MaxHealth;
 		_currentStamina = MaxStamina;
+		
 		_heartsHud = GetNodeOrNull<HeartsHud>("../HeartsHUD");
+		
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite2D");
+		
 		if (_sprite != null)
+		{
 			_defaultSpriteModulate = _sprite.Modulate;
+		}
 
 		_fleshTexLeft = GD.Load<Texture2D>("res://Assets/sprites/Fs_Le_Idle.png");
 		_fleshTexRight = GD.Load<Texture2D>("res://Assets/sprites/Fs_Ri_Idle.png");
 		_fleshTexUp = GD.Load<Texture2D>("res://Assets/sprites/Fs_Ba_Idle.png");
 		_fleshTexDown = GD.Load<Texture2D>("res://Assets/sprites/Fs_Fr_Idle.png");
+		
 		_steelTexLeft = GD.Load<Texture2D>("res://Assets/sprites/St_Le_Idle.png");
 		_steelTexRight = GD.Load<Texture2D>("res://Assets/sprites/St_Ri_Idle.png");
 		_steelTexUp = GD.Load<Texture2D>("res://Assets/sprites/St_Ba_Idle.png");
 		_steelTexDown = GD.Load<Texture2D>("res://Assets/sprites/St_Fr_Idle.png");
 
 		_dashHitbox = GetNodeOrNull<Area2D>("DashHitbox");
+		
 		if (_dashHitbox != null)
+		{
 			_dashHitbox.BodyEntered += OnDashHitboxBodyEntered;
+		}
 
 		_transformBar = GetNodeOrNull<ProgressBar>("../UI/TransformBar");
 
 		_heartsHud?.SetHearts(_currentHealth);
+		
 		UpdateFacingSprite(_lastMoveDirection);
 	}
 
@@ -111,10 +172,13 @@ public partial class Player : CharacterBody2D
 		float d = (float)delta;
 
 		HandleTransformInput(d);
+		
 		HandleStamina(d);
 
 		if (_invincibilityTimer > 0f)
+		{
 			_invincibilityTimer -= d;
+		}
 
 		if (_isTransforming)
 		{
@@ -129,19 +193,31 @@ public partial class Player : CharacterBody2D
 		}
 
 		HandleMovement(d);
+		
 		HandleAttack(d);
+		
 		UpdateFacingSprite(_lastMoveDirection);
 	}
 
+	/// <summary>
+	/// Controlla se il giocatore ha richiesto la trasformazione e verifica che ci sia abbastanza stamina 
+	/// per procedere, assicurandosi che non sia già in corso un'altra azione incompatibile (come lo scatto).
+	/// </summary>
 	private void HandleTransformInput(float delta)
 	{
-		if (Input.IsActionJustPressed("transform") && _currentStamina >= MaxStamina && !_isDashing && !_isTransforming)
+		bool isTransformPressed = Input.IsActionJustPressed("transform");
+		
+		if (isTransformPressed && _currentStamina >= MaxStamina && !_isDashing && !_isTransforming)
 		{
 			_currentStamina = 0f;
 			StartTransformation();
 		}
 	}
 
+	/// <summary>
+	/// Inizia la procedura di trasformazione tra gli stati Flesh e Steel, garantendo l'invincibilità temporanea
+	/// e avviando l'animazione di transizione corrispondente.
+	/// </summary>
 	private void StartTransformation()
 	{
 		_isTransforming = true;
@@ -149,7 +225,9 @@ public partial class Player : CharacterBody2D
 		Velocity = Vector2.Zero;
 
 		if (_sprite != null)
+		{
 			_sprite.Visible = false;
+		}
 
 		if (TransformationScene != null)
 		{
@@ -158,7 +236,9 @@ public partial class Player : CharacterBody2D
 			_transformAnim.ZIndex = 12;
 			_transformAnim.TextureFilter = CanvasItem.TextureFilterEnum.Nearest;
 			_transformAnim.Position = Vector2.Zero;
+			
 			AddChild(_transformAnim);
+			
 			_transformAnim.AnimationFinished += OnTransformAnimFinished;
 
 			if (_currentState == PlayerState.Flesh)
@@ -168,8 +248,10 @@ public partial class Player : CharacterBody2D
 			else
 			{
 				int lastFrame = _transformAnim.SpriteFrames.GetFrameCount("transformation") - 1;
+				
 				_transformAnim.Frame = lastFrame;
 				_transformAnim.FrameProgress = 0.0f;
+				
 				_transformAnim.Play("transformation", -1.0f);
 			}
 		}
@@ -186,14 +268,24 @@ public partial class Player : CharacterBody2D
 
 	private void FinishTransformation()
 	{
-		_currentState = _currentState == PlayerState.Flesh ? PlayerState.Steel : PlayerState.Flesh;
+		if (_currentState == PlayerState.Flesh)
+		{
+			_currentState = PlayerState.Steel;
+		}
+		else
+		{
+			_currentState = PlayerState.Flesh;
+		}
+		
 		_shootCooldownTimer = 0f;
 		_dashCooldownTimer = 0f;
 		_isTransforming = false;
 		_invincibilityTimer = 0.2f;
 
 		if (_sprite != null)
+		{
 			_sprite.Visible = true;
+		}
 
 		if (_transformAnim != null)
 		{
@@ -213,36 +305,47 @@ public partial class Player : CharacterBody2D
 		}
 
 		if (_transformBar != null)
+		{
 			_transformBar.Value = (_currentStamina / MaxStamina) * 100.0;
+		}
 	}
 
+	/// <summary>
+	/// Gestisce il movimento del giocatore tenendo conto delle direzioni di input, 
+	/// della velocità massima determinata dallo stato attuale e di eventuali rallentamenti attivi.
+	/// </summary>
 	private void HandleMovement(float delta)
 	{
 		if (_slowTimer > 0f)
+		{
 			_slowTimer -= delta;
+		}
 
 		float maxSpeed = _currentState == PlayerState.Flesh ? FleshMaxSpeed : SteelMaxSpeed;
 		float effectiveSpeed = maxSpeed;
 		float effectiveAcceleration = Acceleration;
+		
 		if (_slowTimer > 0f)
 		{
 			effectiveSpeed *= SlowMultiplier;
 			effectiveAcceleration *= SlowMultiplier;
 		}
 
-		Vector2 inputDirection = new Vector2(
-			Input.GetActionStrength("move_right") - Input.GetActionStrength("move_left"),
-			Input.GetActionStrength("move_down") - Input.GetActionStrength("move_up")
-		);
+		Vector2 inputDirection = new Vector2(Input.GetActionStrength("move_right") - Input.GetActionStrength("move_left"), Input.GetActionStrength("move_down") - Input.GetActionStrength("move_up"));
 
 		if (inputDirection != Vector2.Zero)
 		{
 			if (Mathf.Abs(inputDirection.X) > Mathf.Abs(inputDirection.Y))
+			{
 				_lastMoveDirection = new Vector2(Mathf.Sign(inputDirection.X), 0);
+			}
 			else
+			{
 				_lastMoveDirection = new Vector2(0, Mathf.Sign(inputDirection.Y));
+			}
 
 			inputDirection = inputDirection.Normalized();
+			
 			Velocity = Velocity.MoveToward(inputDirection * effectiveSpeed, effectiveAcceleration * delta);
 		}
 		else
@@ -253,23 +356,29 @@ public partial class Player : CharacterBody2D
 		MoveAndSlide();
 	}
 
+	/// <summary>
+	/// Delega l'azione di attacco alla funzione appropriata in base allo stato attuale (sparo se Flesh, scatto se Steel).
+	/// </summary>
 	private void HandleAttack(float delta)
 	{
 		if (_currentState == PlayerState.Flesh)
+		{
 			HandleShooting(delta);
+		}
 		else
+		{
 			HandleDashAttack(delta);
+		}
 	}
 
 	private void HandleShooting(float delta)
 	{
 		if (_shootCooldownTimer > 0f)
+		{
 			_shootCooldownTimer -= delta;
+		}
 
-		Vector2 shootInput = new Vector2(
-			Input.GetActionStrength("shoot_right") - Input.GetActionStrength("shoot_left"),
-			Input.GetActionStrength("shoot_down") - Input.GetActionStrength("shoot_up")
-		);
+		Vector2 shootInput = new Vector2(Input.GetActionStrength("shoot_right") - Input.GetActionStrength("shoot_left"), Input.GetActionStrength("shoot_down") - Input.GetActionStrength("shoot_up"));
 
 		bool shootHeld = shootInput != Vector2.Zero;
 
@@ -281,84 +390,123 @@ public partial class Player : CharacterBody2D
 		else
 		{
 			if (_shootWasHeld)
+			{
 				_aimGraceTimer = AimGraceDuration;
+			}
 
 			if (_aimGraceTimer > 0f)
+			{
 				_aimGraceTimer -= delta;
+			}
 		}
 
 		_shootWasHeld = shootHeld;
 
 		if (!shootHeld || _shootCooldownTimer > 0f)
+		{
 			return;
+		}
 
 		Vector2 shootDirection;
+		
 		if (Mathf.Abs(shootInput.X) > Mathf.Abs(shootInput.Y))
+		{
 			shootDirection = new Vector2(Mathf.Sign(shootInput.X), 0);
+		}
 		else
+		{
 			shootDirection = new Vector2(0, Mathf.Sign(shootInput.Y));
+		}
 
 		Shoot(shootDirection);
+		
 		_shootCooldownTimer = ShootCooldown;
 	}
 
 	private void Shoot(Vector2 direction)
 	{
 		if (ProjectileScene == null)
+		{
 			return;
+		}
 
 		direction = direction.Normalized();
+		
 		if (direction == Vector2.Zero)
+		{
 			return;
+		}
 
 		var projectile = ProjectileScene.Instantiate<Projectile>();
+		
 		projectile.GlobalPosition = GlobalPosition + direction * ProjectileSpawnOffset;
+		
 		projectile.Initialize(direction);
+		
 		GetTree().CurrentScene.AddChild(projectile);
 	}
 
 	private void HandleDashAttack(float delta)
 	{
 		if (_dashCooldownTimer > 0f)
+		{
 			_dashCooldownTimer -= delta;
+		}
 
-		Vector2 dashInput = new Vector2(
-			Input.GetActionStrength("shoot_right") - Input.GetActionStrength("shoot_left"),
-			Input.GetActionStrength("shoot_down") - Input.GetActionStrength("shoot_up")
-		);
+		Vector2 dashInput = new Vector2(Input.GetActionStrength("shoot_right") - Input.GetActionStrength("shoot_left"), Input.GetActionStrength("shoot_down") - Input.GetActionStrength("shoot_up"));
 
 		if (dashInput == Vector2.Zero || _dashCooldownTimer > 0f)
+		{
 			return;
+		}
 
 		if (_currentStamina < DashStaminaCost)
+		{
 			return;
+		}
 
 		Vector2 dir;
+		
 		if (Mathf.Abs(dashInput.X) > Mathf.Abs(dashInput.Y))
+		{
 			dir = new Vector2(Mathf.Sign(dashInput.X), 0);
+		}
 		else
+		{
 			dir = new Vector2(0, Mathf.Sign(dashInput.Y));
+		}
 
 		StartDash(dir);
 	}
 
+	/// <summary>
+	/// Inizializza e avvia l'attacco di scatto (dash) nello stato Steel, consumando stamina 
+	/// e abilitando l'hitbox per danneggiare i nemici lungo il percorso.
+	/// </summary>
 	private void StartDash(Vector2 direction)
 	{
 		_isDashing = true;
 		_dashDirection = direction.Normalized();
 		_dashTimer = DashDuration;
+		
 		_dashHitEnemies.Clear();
+		
 		_currentStamina -= DashStaminaCost;
 
 		_aimDirection = VectorToFacingDir(direction);
+		
 		UpdateFacingSprite(direction);
 
 		if (_dashHitbox != null)
 		{
 			_dashHitbox.SetDeferred("monitoring", true);
+			
 			var shape = _dashHitbox.GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
+			
 			if (shape != null)
+			{
 				shape.SetDeferred("disabled", false);
+			}
 		}
 	}
 
@@ -377,6 +525,7 @@ public partial class Player : CharacterBody2D
 		float dashSpeed = (DashDistance / DashDuration) * speedCurve;
 
 		Velocity = _dashDirection * dashSpeed;
+		
 		MoveAndSlide();
 	}
 
@@ -389,34 +538,44 @@ public partial class Player : CharacterBody2D
 		if (_dashHitbox != null)
 		{
 			_dashHitbox.SetDeferred("monitoring", false);
+			
 			var shape = _dashHitbox.GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
+			
 			if (shape != null)
+			{
 				shape.SetDeferred("disabled", true);
+			}
 		}
 	}
 
 	private void OnDashHitboxBodyEntered(Node2D body)
 	{
 		ulong id = body.GetInstanceId();
+		
 		if (_dashHitEnemies.Contains(id))
+		{
 			return;
+		}
 
 		_dashHitEnemies.Add(id);
+		
 		Vector2 knockDir = (body.GlobalPosition - GlobalPosition).Normalized();
 
 		if (body is Enemy enemy)
 		{
 			enemy.TakeDamage(DashDamage);
+			
 			enemy.ApplyKnockback(knockDir, DashKnockbackStrength);
 		}
-		else if (body is Ghost ghost)
+		else if (body is Ghost)
 		{
-			ghost.TakeDamage(DashDamage);
-			ghost.ApplyKnockback(knockDir, DashKnockbackStrength);
+			// Il Ghost è immune allo scatto: viene semplicemente ignorato
+			return;
 		}
 		else if (body is Warden warden)
 		{
 			warden.TakeDamage(DashDamage, fromDash: true);
+			
 			warden.ApplyKnockback(knockDir, DashKnockbackStrength);
 		}
 	}
@@ -431,43 +590,59 @@ public partial class Player : CharacterBody2D
 		TakeDamage(amount, sourcePosition, DamageType.Melee);
 	}
 
+	/// <summary>
+	/// Applica i danni al giocatore tenendo conto delle debolezze specifiche dello stato (Flesh debole al corpo a corpo, 
+	/// Steel debole a distanza), attiva l'invincibilità temporanea e gestisce la morte se la salute scende a zero.
+	/// </summary>
 	public void TakeDamage(int amount, Vector2 sourcePosition, DamageType damageType)
 	{
 		if (amount <= 0 || _currentHealth <= 0)
+		{
 			return;
+		}
 
 		if (_isDashing || _isTransforming || _invincibilityTimer > 0f || IsInvincibleCheat)
+		{
 			return;
+		}
 
 		if (_currentState == PlayerState.Flesh && damageType == DamageType.Melee)
+		{
 			amount *= 2;
+		}
 		else if (_currentState == PlayerState.Steel && damageType == DamageType.Ranged)
+		{
 			amount *= 2;
+		}
 
 		_invincibilityTimer = InvincibilityDuration;
 
 		int actualDamage = Mathf.Min(amount, _currentHealth);
+		
 		_currentHealth -= actualDamage;
 
 		_heartsHud?.TakeDamage(actualDamage);
+		
 		ApplyHitEffects(sourcePosition);
 
 		if (_currentHealth <= 0)
 		{
 			_currentHealth = 0;
+			
 			_heartsHud?.SetHearts(0);
 
 			var endgame = GetNodeOrNull<EndgameOverlay>("/root/Main/EndgameOverlay");
+			
 			if (endgame != null)
 			{
 				endgame.TriggerGameOver();
 			}
 			else
 			{
-				// Fallback if overlay is missing
 				_currentHealth = MaxHealth;
 				_heartsHud?.ResetHearts();
-				GD.PrintErr("EndgameOverlay not found! Resetting health instead.");
+				
+				GD.PrintErr("EndgameOverlay non trovato! Reset della salute completato.");
 			}
 			return;
 		}
@@ -476,16 +651,24 @@ public partial class Player : CharacterBody2D
 	public void FullHeal()
 	{
 		_currentHealth = MaxHealth;
+		
 		_heartsHud?.SetHearts(_currentHealth);
 	}
 
+	/// <summary>
+	/// Applica effetti visivi e fisici al giocatore quando subisce danni, come il rallentamento,
+	/// il contraccolpo (knockback) e il lampeggio del srite.
+	/// </summary>
 	private void ApplyHitEffects(Vector2 sourcePosition)
 	{
 		_slowTimer = SlowDuration;
 
 		Vector2 dir = GlobalPosition - sourcePosition;
+		
 		if (dir != Vector2.Zero)
+		{
 			Velocity += dir.Normalized() * KnockbackStrength;
+		}
 
 		BlinkDamage();
 	}
@@ -493,18 +676,23 @@ public partial class Player : CharacterBody2D
 	private void BlinkDamage()
 	{
 		if (_sprite == null)
+		{
 			return;
+		}
 
 		_flashTween?.Kill();
 		_flashTween = CreateTween();
 
 		Color baseCol = _defaultSpriteModulate;
+		
 		Color offCol = new Color(baseCol.R, baseCol.G, baseCol.B, 0f);
+		
 		Color onCol = new Color(baseCol.R, baseCol.G, baseCol.B, 1f);
 
 		for (int i = 0; i < BlinkCount; i++)
 		{
 			_flashTween.TweenProperty(_sprite, "modulate", offCol, BlinkInterval);
+			
 			_flashTween.TweenProperty(_sprite, "modulate", onCol, BlinkInterval);
 		}
 	}
@@ -512,7 +700,10 @@ public partial class Player : CharacterBody2D
 	private FacingDir VectorToFacingDir(Vector2 v)
 	{
 		if (Mathf.Abs(v.X) > Mathf.Abs(v.Y))
+		{
 			return v.X < 0 ? FacingDir.Left : FacingDir.Right;
+		}
+		
 		return v.Y < 0 ? FacingDir.Up : FacingDir.Down;
 	}
 
@@ -522,32 +713,32 @@ public partial class Player : CharacterBody2D
 		{
 			return dir switch
 			{
-				FacingDir.Left => _steelTexLeft,
-				FacingDir.Right => _steelTexRight,
-				FacingDir.Up => _steelTexUp,
-				_ => _steelTexDown
+				FacingDir.Left => _steelTexLeft, FacingDir.Right => _steelTexRight, FacingDir.Up => _steelTexUp, _ => _steelTexDown
 			};
 		}
 
 		return dir switch
 		{
-			FacingDir.Left => _fleshTexLeft,
-			FacingDir.Right => _fleshTexRight,
-			FacingDir.Up => _fleshTexUp,
-			_ => _fleshTexDown
+			FacingDir.Left => _fleshTexLeft, FacingDir.Right => _fleshTexRight, FacingDir.Up => _fleshTexUp, _ => _fleshTexDown
 		};
 	}
 
 	private void UpdateFacingSprite(Vector2 moveDirection)
 	{
 		if (_sprite == null)
+		{
 			return;
+		}
 
 		bool aimOverride = _shootWasHeld || _aimGraceTimer > 0f || _isDashing;
+		
 		FacingDir dir = aimOverride ? _aimDirection : VectorToFacingDir(moveDirection);
 
 		Texture2D tex = GetTextureForFacing(dir);
+		
 		if (tex != null && _sprite.Texture != tex)
+		{
 			_sprite.Texture = tex;
+		}
 	}
 }

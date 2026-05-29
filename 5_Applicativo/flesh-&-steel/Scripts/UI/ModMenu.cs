@@ -16,10 +16,15 @@ public partial class ModMenu : CanvasLayer
 
 	public override void _Ready()
 	{
+		if (!OS.HasFeature("demo") && !OS.IsDebugBuild())
+		{
+			QueueFree();
+			return;
+		}
+
 		_menuPanel = GetNode<Control>("MenuPanel");
 		_menuPanel.Visible = false;
 
-		// Get nodes from the absolute root since ModMenu is deeply nested under UI CanvasLayer
 		_player = GetNodeOrNull<Player>("/root/Main/Player");
 		_roomManager = GetNodeOrNull<RoomManager>("/root/Main/RoomManager");
 
@@ -28,17 +33,28 @@ public partial class ModMenu : CanvasLayer
 			GD.PrintErr("ModMenu: Could not find Player or RoomManager!");
 		}
 
-		var btnKillEnemies = GetNode<Button>("MenuPanel/VBoxContainer/BtnKillEnemies");
-		var btnClearRooms = GetNode<Button>("MenuPanel/VBoxContainer/BtnClearRooms");
-		var btnKillBoss = GetNode<Button>("MenuPanel/VBoxContainer/BtnKillBoss");
-		var btnFullHeal = GetNode<Button>("MenuPanel/VBoxContainer/BtnFullHeal");
-		_invincibilityButton = GetNode<CheckButton>("MenuPanel/VBoxContainer/CheckInvincibility");
+		var vbox = GetNode<VBoxContainer>("MenuPanel/VBoxContainer");
+		var btnKillEnemies = vbox.GetNode<Button>("BtnKillEnemies");
+		var btnClearRooms = vbox.GetNode<Button>("BtnClearRooms");
+		var btnKillBoss = vbox.GetNode<Button>("BtnKillBoss");
+		var btnFullHeal = vbox.GetNode<Button>("BtnFullHeal");
+		_invincibilityButton = vbox.GetNode<CheckButton>("CheckInvincibility");
 
 		btnKillEnemies.Pressed += OnKillEnemiesPressed;
 		btnClearRooms.Pressed += OnClearRoomsPressed;
 		btnKillBoss.Pressed += OnKillBossPressed;
 		btnFullHeal.Pressed += OnFullHealPressed;
 		_invincibilityButton.Toggled += OnInvincibilityToggled;
+
+		var btnSpawnCoal = new Button();
+		btnSpawnCoal.Text = "Spawn Coal";
+		btnSpawnCoal.Pressed += OnSpawnCoalPressed;
+		vbox.AddChild(btnSpawnCoal);
+
+		var btnSpawnGhost = new Button();
+		btnSpawnGhost.Text = "Spawn Ghost";
+		btnSpawnGhost.Pressed += OnSpawnGhostPressed;
+		vbox.AddChild(btnSpawnGhost);
 	}
 
 	public override void _Process(double delta)
@@ -53,6 +69,10 @@ public partial class ModMenu : CanvasLayer
 		}
 	}
 
+	/// <summary>
+	/// Intercetta gli input da tastiera non gestiti per rilevare l'inserimento del codice cheat.
+	/// Utilizza un buffer per memorizzare gli ultimi tasti premuti.
+	/// </summary>
 	public override void _UnhandledKeyInput(InputEvent @event)
 	{
 		if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo)
@@ -77,6 +97,9 @@ public partial class ModMenu : CanvasLayer
 		}
 	}
 
+	/// <summary>
+	/// Alterna la visibilità del pannello dei cheat e aggiorna lo stato dei bottoni in base ai cheat attivi.
+	/// </summary>
 	private void ToggleMenu()
 	{
 		_menuPanel.Visible = !_menuPanel.Visible;
@@ -87,6 +110,9 @@ public partial class ModMenu : CanvasLayer
 		}
 	}
 
+	/// <summary>
+	/// Richiede al RoomManager di eliminare tutti i nemici presenti nella stanza corrente.
+	/// </summary>
 	private void OnKillEnemiesPressed()
 	{
 		_roomManager?.KillAllEnemiesInCurrentRoom();
@@ -113,5 +139,15 @@ public partial class ModMenu : CanvasLayer
 		{
 			_player.IsInvincibleCheat = toggledOn;
 		}
+	}
+
+	private void OnSpawnCoalPressed()
+	{
+		_roomManager?.SpawnEnemyAtCenter("coal");
+	}
+
+	private void OnSpawnGhostPressed()
+	{
+		_roomManager?.SpawnEnemyAtCenter("ghost");
 	}
 }
